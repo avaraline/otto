@@ -10,11 +10,13 @@
     let stage;
     export let width = 300;
     export let height = 300;
+    export let scale = 1.0;
     onMount(() => {
         stage = new Konva.Stage({
             container: container,
             width: width,
-            height: height
+            height: height,
+            scale: {x: scale, y: scale},
         })
     })
 </script>

@@ -1,34 +1,103 @@
 <script lang="ts">
 	export let name: string;
-	import { parse } from "avarascript.pegjs"
-	import MapEditor from "2D/MapEditor.svelte"
-	import XMLEditor from "XMLEditor.svelte"
-	import Preview from "3D/Preview.svelte"
+	import { onMount } from "svelte"
+	import MapEditor from "./2D/MapEditor.svelte"
+	import XMLEditor from "./XMLEditor.svelte"
+	import Preview from "./3D/Preview.svelte"
+
+	import { rects, arcs, alfsource } from "./store"
+	import { loadText } from "./files";
+	import { handleColor, getRect, getArc } from "./alf"
+	import { handleScript } from "./avarluation";
+
+	let ctx = {
+		fillColor: "#ffffff",
+		frameColor: "#000000",
+		wa: 0,
+		wallHeight: 3,
+		lastRect: null,
+		lastArcAngle: 0,
+		handleObject: function (ctx, ins) {
+			console.log(ins);
+		}
+	}
+
+	let preview2D, preview3D, scale_2d
+	let width_2d, height_2d
+	let width_3d, height_3d
+
+	onMount(async () => {
+
+		loadText("grimoire.alf").then(s => {
+			alfsource.set(s)
+			let doc = new DOMParser().parseFromString(s, "text/html")
+			let themap = doc.querySelector("map")
+			let map_width = parseInt(themap.getAttribute("width"))
+			width_2d = preview2D.offsetWidth
+			height_2d = preview2D.offsetHeight
+			width_3d = preview3D.offsetWidth
+			height_3d = preview3D.offsetHeight
+			scale_2d = Math.min(preview2D.offsetWidth / map_width, 1.0);
+			let rs = []
+			let as = []
+			let _ = [...themap.children].forEach((elem, idx) => {
+				handleColor(ctx, elem)
+				switch (elem.tagName.toLowerCase()) {
+					case "rect":
+						let r = getRect(ctx, elem, idx)
+						ctx.lastRect = r
+						rs.push(r)
+						break
+					case "arc":
+						as.push(getArc(ctx, elem, idx))
+						break;
+				}
+				handleScript(ctx, elem.textContent)
+			})
+			console.log(rs);
+			rects.set(rs)
+		})
+	})
+	
 </script>
 
 <main>
-	<h1>Hello {name}!</h1>
-	<p>Visit the <a href="https://svelte.dev/tutorial">Svelte tutorial</a> to learn how to build Svelte apps.</p>
+	<div id="source">
+		<XMLEditor/>
+	</div>
+	<div bind:this={preview2D}>
+		<MapEditor width={height_2d} height={width_2d} scale={scale_2d}/>
+	</div>
+	<div bind:this={preview3D}>
+		<Preview width={width_3d} height={height_3d}/>
+	</div>
 </main>
 
 <style>
-	main {
-		text-align: center;
-		padding: 1em;
-		max-width: 240px;
-		margin: 0 auto;
+	#source {
+		position: absolute;
+		top: 0;
+		left: 0;
+		bottom: 0;
+		width: 40%;
+		font-family: monospace;
+		border: none;
+		padding: 10px;
 	}
-
-	h1 {
-		color: #ff3e00;
-		text-transform: uppercase;
-		font-size: 4em;
-		font-weight: 100;
+	#preview2D {
+		position: absolute;
+		top: 0;
+		left: calc(40% + 10px);
+		height: 50%;
+		right: 0;
+		overflow: auto;
 	}
-
-	@media (min-width: 640px) {
-		main {
-			max-width: none;
-		}
+	#preview3D {
+		position: absolute;
+		top: calc(50% + 10px);
+		left: calc(40% + 10px);
+		bottom: 0;
+		right: 0;
+		overflow: auto;
 	}
 </style>

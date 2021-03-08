@@ -2,10 +2,11 @@
     import CodeMirror from '@svelte-parts/editor/codemirror'
     import 'codemirror/mode/xml/xml'
     import 'codemirror/lib/codemirror.css'
+    import { alfsource } from './store'
 
     export let theme = 'default'
     export let onChange = undefined
-    export let initialValue = ''
+
     const config = {
         lineNumbers: true,
         lineWrapping: true,
@@ -21,8 +22,13 @@
         editor.on('change', e => {
             if (onChange) { onChange(e.getValue()) }
         })
-        editor.setValue(initialValue);
+        alfsource.subscribe(d => {
+            editor.setValue(d)
+        })
     }
 </script>
 
-<CodeMirror config={config} accessEditor={accessEditor}></CodeMirror>
+<CodeMirror 
+    config={config} 
+    accessEditor={accessEditor}>
+</CodeMirror>
