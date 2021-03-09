@@ -84,10 +84,10 @@ function "function" =
     { return {"func": name["name"], "args": 
         [head, ...tail.map(t => t[t.length - 1])] } }  
     
-expr = 
-    head:(unary_op ? expr_term) tail:(_ ? op _ ? expr_term)*
+expr =
+    head:(unary_op ? _ ? expr_term) tail:(_ ? op _ ? expr_term)*
     { 
-        head = head.filter(head => head);
+        head = head.filter(h => h && h[0] !== " ");
         if (tail.length == 0) return head.length == 1 ? head[0] : head;
         var res = [...head, ...tail.flat().filter(e => 
             !(Array.isArray(e) && e.length == 0) && e && e[0] !== " ")]

@@ -121,10 +121,10 @@ export function handleScript(ctx, data) {
 
     if(is_defined("wa")) {
         ctx.wa = get_variable("wa");
-        set_variable("wa", 0);
+        //set_variable("wa", 0);
     }
     if(is_defined("wallHeight")) {
         ctx.wallHeight = get_variable("wallHeight");
-        set_variable("wallHeight", 0);
+        //set_variable("wallHeight", 0);
     }
 }

@@ -5,10 +5,10 @@
 	import XMLEditor from "./XMLEditor.svelte"
 	import Preview from "./3D/Preview.svelte"
 
-	import { rects, arcs, alfsource } from "./store"
+	import { walls, ramps, alfsource } from "./store"
 	import { loadText } from "./files";
-	import { handleColor, getRect, getArc } from "./alf"
-	import { handleScript } from "./avarluation";
+	import { getWall, getRamp } from "./alf"
+	import { handleScript, set_variable } from "./avarluation";
 
 	let ctx = {
 		fillColor: "#ffffff",
@@ -30,32 +30,44 @@
 
 		loadText("grimoire.alf").then(s => {
 			alfsource.set(s)
-			let doc = new DOMParser().parseFromString(s, "text/html")
+			let doc = new DOMParser().parseFromString(s, "text/xml")
 			let themap = doc.querySelector("map")
 			let map_width = parseInt(themap.getAttribute("width"))
 			width_2d = preview2D.offsetWidth
 			height_2d = preview2D.offsetHeight
 			width_3d = preview3D.offsetWidth
 			height_3d = preview3D.offsetHeight
-			scale_2d = Math.min(preview2D.offsetWidth / map_width, 1.0);
-			let rs = []
-			let as = []
+			scale_2d = 3.0//Math.min(preview2D.offsetWidth / map_width, 1.0);
+			let ws = []
+			//let as = []
 			let _ = [...themap.children].forEach((elem, idx) => {
-				handleColor(ctx, elem)
+				//console.log(elem.tagName);
+				//handleColor(ctx, elem)
 				switch (elem.tagName.toLowerCase()) {
-					case "rect":
-						let r = getRect(ctx, elem, idx)
-						ctx.lastRect = r
-						rs.push(r)
+					case "set":
+						if (elem.hasAttributes()) {
+							[...elem.attributes].map(attr => {
+								let as = attr.name + " = " + attr.value;
+								handleScript(ctx, as)
+							})
+						}
+						break
+					case "walldoor":
+						// remove previous Wall instruction and fall thru
+						ws.pop()
+					case "wall":
+						let w = getWall(ctx, elem, idx)
+						ctx.lastRect = w
+						ws.push(w)
 						break
 					case "arc":
-						as.push(getArc(ctx, elem, idx))
-						break;
+						//as.push(getArc(ctx, elem, idx))
+						break
 				}
 				handleScript(ctx, elem.textContent)
 			})
-			console.log(rs);
-			rects.set(rs)
+			//console.log(ws);
+			walls.set(ws)
 		})
 	})
 	
@@ -65,10 +77,10 @@
 	<div id="source">
 		<XMLEditor/>
 	</div>
-	<div bind:this={preview2D}>
-		<MapEditor width={height_2d} height={width_2d} scale={scale_2d}/>
+	<div id="preview2D" bind:this={preview2D}>
+		<MapEditor height={height_2d} width={width_2d} scale={scale_2d}/>
 	</div>
-	<div bind:this={preview3D}>
+	<div id="preview3D" bind:this={preview3D}>
 		<Preview width={width_3d} height={height_3d}/>
 	</div>
 </main>

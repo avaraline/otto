@@ -6,15 +6,15 @@
     import Arc from './Arc.svelte'
     import Rect from './Rect.svelte'
 
-    import { rects } from '../store'
+    import { walls } from '../store'
 
-    let myrects = [];
+    let mywalls = [];
 
-    rects.subscribe((t)=> {myrects = t})
+    walls.subscribe((t)=> {mywalls = t})
 
     export let width = 300;
     export let height = 300;
-    export let scale = 1.0;
+    export let scale = {x: 3.0, y: 3.0};
 
     let container;
     onMount(() => {
@@ -23,13 +23,16 @@
 
 <Stage width={width} height={height} scale={scale}>
     <Layer>
-        {#each myrects as r}
+        {#each mywalls as w}
             <Rect
-                x={r.left}
-                y={r.top}
-                w={r.width}
-                h={r.height}
-                fill={r.color}
+                x={w.x}
+                y={w.z}
+                w={w.w}
+                h={w.d}
+                fill={w.fill}
+                frame={w.frame}
+                midYaw={w.midYaw}
+                idx={w.idx}
                 />
         {/each}
     </Layer>

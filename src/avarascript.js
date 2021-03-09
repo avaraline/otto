@@ -220,7 +220,7 @@ module.exports = /*
         peg$c70 = function(name, head, tail) { return {"func": name["name"], "args": 
                 [head, ...tail.map(t => t[t.length - 1])] } },
         peg$c71 = function(head, tail) { 
-                head = head.filter(head => head);
+                head = head.filter(h => h && h[0] !== " ");
                 if (tail.length == 0) return head.length == 1 ? head[0] : head;
                 var res = [...head, ...tail.flat().filter(e => 
                     !(Array.isArray(e) && e.length == 0) && e && e[0] !== " ")]
@@ -1835,10 +1835,19 @@ module.exports = /*
         s2 = null;
       }
       if (s2 !== peg$FAILED) {
-        s3 = peg$parseexpr_term();
+        s3 = peg$parse_();
+        if (s3 === peg$FAILED) {
+          s3 = null;
+        }
         if (s3 !== peg$FAILED) {
-          s2 = [s2, s3];
-          s1 = s2;
+          s4 = peg$parseexpr_term();
+          if (s4 !== peg$FAILED) {
+            s2 = [s2, s3, s4];
+            s1 = s2;
+          } else {
+            peg$currPos = s1;
+            s1 = peg$FAILED;
+          }
         } else {
           peg$currPos = s1;
           s1 = peg$FAILED;
