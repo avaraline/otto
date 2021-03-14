@@ -1,26 +1,15 @@
 <script lang="ts">
-	export let name: string;
 	import { onMount } from "svelte"
 	import MapEditor from "./2D/MapEditor.svelte"
 	import XMLEditor from "./XMLEditor.svelte"
 	import Preview from "./3D/Preview.svelte"
 
-	import { walls, ramps, alfsource } from "./store"
+	import { objects, alfsource } from "./store"
 	import { loadText } from "./files";
-	import { getWall, getRamp } from "./alf"
-	import { handleScript, set_variable } from "./avarluation";
+	import { objectsFromMap } from "./alf"
+	import { get_variable, is_defined, set_variable } from "./avarluation";
 
-	let ctx = {
-		fillColor: "#ffffff",
-		frameColor: "#000000",
-		wa: 0,
-		wallHeight: 3,
-		lastRect: null,
-		lastArcAngle: 0,
-		handleObject: function (ctx, ins) {
-			console.log(ins);
-		}
-	}
+	
 
 	let preview2D, preview3D, scale_2d
 	let width_2d, height_2d
@@ -29,47 +18,23 @@
 	onMount(async () => {
 
 		loadText("grimoire.alf").then(s => {
-			alfsource.set(s)
-			let doc = new DOMParser().parseFromString(s, "text/xml")
-			let themap = doc.querySelector("map")
-			let map_width = parseInt(themap.getAttribute("width"))
 			width_2d = preview2D.offsetWidth
 			height_2d = preview2D.offsetHeight
 			width_3d = preview3D.offsetWidth
 			height_3d = preview3D.offsetHeight
 			scale_2d = 3.0//Math.min(preview2D.offsetWidth / map_width, 1.0);
-			let ws = []
-			//let as = []
-			let _ = [...themap.children].forEach((elem, idx) => {
-				//console.log(elem.tagName);
-				//handleColor(ctx, elem)
-				switch (elem.tagName.toLowerCase()) {
-					case "set":
-						if (elem.hasAttributes()) {
-							[...elem.attributes].map(attr => {
-								let as = attr.name + " = " + attr.value;
-								handleScript(ctx, as)
-							})
-						}
-						break
-					case "walldoor":
-						// remove previous Wall instruction and fall thru
-						ws.pop()
-					case "wall":
-						let w = getWall(ctx, elem, idx)
-						ctx.lastRect = w
-						ws.push(w)
-						break
-					case "arc":
-						//as.push(getArc(ctx, elem, idx))
-						break
-				}
-				handleScript(ctx, elem.textContent)
+
+
+			alfsource.set(s)
+			alfsource.subscribe((s) => {
+				objects.set(objectsFromMap(s).filter(o => o));
+				console.log(objects)
 			})
-			//console.log(ws);
-			walls.set(ws)
+			
 		})
 	})
+
+	
 	
 </script>
 

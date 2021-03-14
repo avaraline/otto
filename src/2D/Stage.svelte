@@ -10,7 +10,7 @@
     let stage;
     export let width = 300;
     export let height = 300;
-    export let scale = {x: 3.0, y: 3.0};
+    let scale = {x: 3.0, y: 3.0};
     onMount(() => {
         stage = new Konva.Stage({
             container: container,
@@ -22,7 +22,7 @@
     afterUpdate(() => {
         stage.setAttr("width", width);
         stage.setAttr("height", height);
-        stage.scale(scale.x, scale.y);
+        stage.scale(scale);
     })
 </script>
 

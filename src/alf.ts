@@ -1,79 +1,159 @@
-type AvaraObject = {
-    script: string;
-    idx: number;
-    fill: string;
+import { 
+    avarluate_expression, 
+    avarluate_script, 
+    is_defined, 
+    set_variable, 
+    get_variable 
+} from './avarluation'
+
+type Color = {
+    fill: string
     frame: string
 }
+
 type Placed = {
-    x: number;
-    z: number;
+    x: number
+    z: number
 }
 
 type Rect = {
-    w: number;
-    d: number;
+    w: number
+    d: number
 }
 
-export type Wall = (AvaraObject & Placed & Rect) & {
-    wallHeight: number;
-    wa: number;
-    midYaw: number;
+type Arc = {
+    start: number
+    extent: number
 }
 
-export type Ramp = (AvaraObject & Placed & Rect) & {
-    start: number;
-    extent: number;
+type Actor = Placed & Color
+
+export type Wall = (Actor & Rect) & {
+    midYaw: number
 }
 
-export function getRamp(ctx, elem: Element, idx: number): Ramp {
-    return {
-        start: parseFloat(safeGet(elem, "start")) - 90,
-        extent: parseFloat(safeGet(elem, "extent")),
-        ...getColors(elem),
-        ...getPlace(elem),
-        ...getDims(elem),
-        idx: idx,
-        script: "",
+export type Ramp = Actor & Rect & Arc
+
+export type AvaraObject = Actor & {
+    tag: Element
+    tag_string: string
+    xpath: string
+    
+}
+
+let ctx = {
+    fillColor: "#ffffff",
+    frameColor: "#000000",
+    wa: () => {
+        if (is_defined('wa')) {
+            let wa = get_variable('wa')
+            return wa
+        }
+        else return 0
+    },
+    wallHeight: () =>  {
+        if (is_defined('wallHeight')) {
+            let wh =  get_variable('wallHeight')
+            set_variable('wallHeight', 3);
+            return wh
+        }
+        else return 3
+    },
+    lastRect: null,
+    lastArcAngle: 0,
+    handleObject: function (ctx, ins) {
+        console.log(ins);
     }
 }
 
-export function getWall(ctx, elem: Element, idx: number): Wall {
+function getRamp(elem: Element): Ramp {
+    return {
+        ...getColorPlaceDims(elem),
+        start: safeAttr(elem, "start"),
+        extent: safeAttr(elem, "extent"),
+    }
+}
+
+function getWall(elem: Element): Wall {
+    return {
+        ...getColorPlaceDims(elem),
+        midYaw: attrExpr(elem, "midYaw")
+    }
+}
+
+function getColorPlaceDims(elem: Element) {
     return {
         ...getColors(elem),
         ...getPlace(elem),
-        ...getDims(elem),
-        midYaw: parseFloat(safeGet(elem, "midYaw")) ?? 0,
-        idx: idx,
-        script: "",
-        wallHeight: ctx.wallHeight,
-        wa: ctx.wa
+        ...getDims(elem)
     }
 }
 
 function getColors(elem: Element) {
     return {
-        fill: safeGet(elem, "fill", "#FF00FF"),
-        frame: safeGet(elem, "frame", "#000000"),
+        fill: safeAttr(elem, "fill", "#FF00FF"),
+        frame: safeAttr(elem, "frame", "#000000"),
     }
 }
 
 function getPlace(elem: Element) {
+    let y = attrExpr(elem, "y")
+    if (!y) y = ctx.wa()
     return {
-        x: parseFloat(safeGet(elem, "x")),
-        z: parseFloat(safeGet(elem, "z")),
+        x: attrExpr(elem, "x"),
+        y: y,
+        z: attrExpr(elem, "z"),
     }
 }
 
 function getDims(elem: Element) {
+    let h = attrExpr(elem, "h")
+    if (!h || h == 0) h = ctx.wallHeight()
     return {
-        w: parseFloat(safeGet(elem, "w")),
-        d: parseFloat(safeGet(elem, "d"))
+        w: attrExpr(elem, "w"),
+        d: attrExpr(elem, "d"),
+        h: h
     }
 }
 
-function safeGet(elem, attr, thedefault:any = 0) {
+function safeAttr(elem, attr, thedefault:any = 0) {
     let val = elem.getAttribute(attr)
     if (val)
     return elem.getAttribute(attr).replace(" ", "")
     else return thedefault
+}
+
+function attrExpr(elem, attr) {
+    let val = safeAttr(elem, attr, "")
+    let result = avarluate_expression(val);
+    if (result) return result;
+    else return 0;
+}
+
+export function objectsFromMap(map_string:string): any {
+    if (!map_string) return []
+    let doc = new DOMParser().parseFromString(map_string, "text/xml")
+    let themap = doc.querySelector("map")
+    let objects = new Array<AvaraObject> ()
+    let _ = [...themap.children].forEach((elem, idx) => {
+        switch (elem.tagName.toLowerCase()) {
+            case "set":
+                if (elem.hasAttributes())
+                    [...elem.attributes].map(attr => 
+                        avarluate_script(`${attr.name} = ${attr.value}`))
+                break
+            case "walldoor":
+            case "wall":
+                let w = getWall(elem)
+                ctx.lastRect = w
+                objects.push({
+                    ...w
+                })
+                break
+            case "ramp":
+                let r = getRamp(elem)
+                break
+        }
+    })
+    return objects
 }

@@ -10,13 +10,12 @@
         WebGLRenderer,
         AmbientLight,
         OrbitControls,
-        Vector3,
-        MathUtils
+        Vector3
     } from "svelthree";
 import Camera from "svelthree/src/components/Camera.svelte";
-import type { Wall } from "../alf";
+import type { AvaraObject } from "../alf";
     import { loadBSP } from  "../files"
-    import { walls, ramps } from "../store"
+    import { objects, ramps } from "../store"
 
     let wallMesh = new BoxBufferGeometry(1, 1, 1);
     let wallMat = new MeshStandardMaterial()
@@ -28,8 +27,8 @@ import type { Wall } from "../alf";
     let minX = 0, maxX = 0, minZ = 0, maxZ = 0, maxY = 5
 
     //loadBSP(400).then((shape) => {wallMesh = shape})
-    walls.subscribe((ws) => {
-        ws.map((w: Wall, idx) => {
+    objects.subscribe((os) => {
+        os.map((w: AvaraObject, idx) => {
             if (w.x < minX) minX = w.x
             if (w.z < minZ) minZ = w.z
             if (w.x > maxX) maxX = w.x
@@ -42,7 +41,7 @@ import type { Wall } from "../alf";
         overZ = (minZ + maxZ) / 2
     })
     
-    
+    let radians = (deg) => deg * (Math.PI / 180)
 
 </script>
 
@@ -54,23 +53,23 @@ import type { Wall } from "../alf";
             props={{ position: [overX, overZ, overY + 30], lookAt: [overX, overY, overZ], near: 0.1, far: 2000 }} />
         <DirectionalLight {scene} props={{position:[10, 10, 10]}} />
         <AmbientLight {scene} props={{ position: [3, 3, 3] }} intensity={0.3}/>
-        {#each $walls as w}
+        {#each $objects as o}
             <Mesh
                 {scene}
                 geometry={wallMesh}
                 material={wallMat.clone()}
-                mat={{ color: w.fill }}
+                mat={{ color: o.fill }}
                 pos={[
-                    w.x + w.w / 2,
-                    w.wallHeight + w.wa,
-                    w.z + w.d / 2
+                    o.x + o.w / 2,
+                    o.y + o.h / 2,
+                    o.z + o.d / 2
                 ]}
                 scale={[
-                    w.w,
-                    w.wallHeight,
-                    w.d
+                    o.w,
+                    o.h,
+                    o.d
                 ]}
-                
+                rot = {[0, radians(o.midYaw), 0]}
             />
         {/each}
         

@@ -1,6 +1,4 @@
-import { RepeatWrapping } from "three";
-import THREE = require("three");
-
+import { BufferGeometry, Float32BufferAttribute, Mesh } from 'svelthree'
 let meshes = {}
 let texts = {}
 
@@ -14,7 +12,7 @@ export let loadText = async function (name: string): Promise<string>
 }
 
 
-export let loadBSP = async function (id: number): Promise<THREE.Mesh>
+export let loadBSP = async function (id: number): Promise<Mesh>
 {
 
     if (meshes[id]) return meshes[id];
@@ -25,36 +23,29 @@ export let loadBSP = async function (id: number): Promise<THREE.Mesh>
     
 }
 
-let disposeArray = () => { this.array = null }
-
-let fetchBSP = async function (id: number) : Promise<THREE.Mesh>
+let fetchBSP = async function (id: number) : Promise<void | BufferGeometry>
 {
-    
     return fetch("bsps/" + id + ".json")
     .then(response => response.json())
     .then((data) => {
-        let positions = [];
-        let normals = [];
-        //let colors = [];
+        let positions = []
+        let normals = []
+        let colors = []
 
         for (const poly of data.polys) {
             for (const tri of poly.tris) {
                 for (const idx of tri) {
-                    Array.prototype.push.apply(positions, data.points[idx]);
-                    Array.prototype.push.apply(normals, poly.normal);
+                    Array.prototype.push.apply(positions, data.points[idx])
+                    Array.prototype.push.apply(normals, poly.normal)
+                    Array.prototype.push.apply(colors, poly.color)
                 }
             }
         }
 
-        let geometry = new THREE.BufferGeometry();
-        geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3).onUpload(disposeArray));
-        geometry.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3).onUpload(disposeArray));
-
-        let material = new THREE.MeshLambertMaterial({
-            color: "red",
-            side: THREE.DoubleSide
-        });
-
-        return new THREE.Mesh(geometry, material);
+        let gbuffa = new BufferGeometry();
+        gbuffa.setAttribute('position', new Float32BufferAttribute(positions, 3).onUpload(() => { this.array = null }))
+        gbuffa.setAttribute('normal', new Float32BufferAttribute(normals, 3).onUpload(() => { this.array = null }))
+        gbuffa.setAttribute('color', new Float32BufferAttribute(colors, 1).onUpload(() => { this.array = null }))
+        return gbuffa
     })
 }

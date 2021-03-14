@@ -1,47 +1,52 @@
 <script lang="ts">
     import Konva from 'konva';
-    import { getContext, onDestroy } from 'svelte';
-    import { bookmark } from '../store';
+    import { onMount, getContext, onDestroy, afterUpdate } from 'svelte';
+import PropUtils from 'svelthree/src/utils/PropUtils.svelte';
 
-    export let x = 0
-    export let y = 0
-    export let w = 10
-    export let h = 10
-    export let fill = "#00FF00"
-    export let frame = "#000000"
-    export let strokeWidth = 1
-    export let idx = 0
-    export let selected = false
-    export let radius = 0
-    export let midYaw = 0
+    export let props = {
+        x: 0,
+        z: 0,
+        w: 10,
+        d: 10,
+        fill: "#00ff00",
+        frame: "#000000",
+        strokeWidth: 1,
+        selected: false,
+        radius: 0,
+        midYaw: 0
+    }
 
+    export let onTransform = (x, y, newx, newy) => {}
+    export let onClick = (evt, props) => {}
 
-    export let onTransform = () => {}
-    export let onClick = () => {}
-
+    export let select = () => props.selected = true
+    export let unselect = () => props.selected = false
+    
     const { getLayer } = getContext("konva_layer")
     const layer = getLayer()
-    
-    const rect = new Konva.Rect({
-        x: x + (w / 2),
-        y: y + (h / 2),
-        width: w,
-        height: h,
-        offsetX: w / 2,
-        offsetY: h / 2,
-        draggable: true,
-        fill: fill,
-        stroke: frame,
-        strokeWidth: strokeWidth,
-        strokeScaleEnabled: false,
-        cornerRadius: radius,
-    })
-    //rect.rotation(midYaw)
 
-    const tr = new Konva.Transformer({
+    let rectprops = () => { return {
+        x: props.x + (props.w / 2),
+        y: props.z + (props.d / 2),
+        width: props.w,
+        height: props.d,
+        offsetX: props.w / 2,
+        offsetY: props.d / 2,
+        draggable: true,
+        fill: props.fill,
+        stroke: props.frame,
+        strokeWidth: props.strokeWidth,
+        strokeScaleEnabled: false,
+        cornerRadius: props.radius ?? 0,
+        rotation: props.midYaw ? props.midYaw + 90 : 0
+    }}
+    
+    let  rect = new Konva.Rect()
+    
+    let tr = new Konva.Transformer({
         nodes: [rect],
         ignoreStroke: true,
-        padding: strokeWidth,
+        padding: props.strokeWidth,
     });
 
     const wasTransformed = () => {
@@ -49,26 +54,28 @@
         const new_height = rect.height() * rect.scaleY()
         onTransform(rect.x, rect.y, new_width, new_height)
     }
-    tr.rotateEnabled(false)
 
-    layer.add(rect)
-    layer.add(tr)
-    tr.hide()
-    if (midYaw) rect.rotation(midYaw + 90)
     rect.on('transform', wasTransformed)
-    rect.on('click', (e) => {
-        selected = !selected;
-        if (selected) {
+    rect.on('click', (ev) => { onClick(ev.evt, props)});
+
+    onMount(() => {
+        layer.add(rect)
+        layer.add(tr)
+        tr.hide()
+        layer.draw()
+    })
+
+    afterUpdate(() => {
+        rect.setAttrs(rectprops())
+        if (props.selected) { 
             tr.show()
             tr.forceUpdate()
-            console.log(idx)
-            bookmark.set(idx)
         }
-        else{
-            tr.hide()
-        }
-        onClick(e.evt, idx, selected)
+        else tr.hide()
     })
-    layer.draw()
-    onDestroy(() => rect.destroy())
+
+    onDestroy(() => {
+        rect.destroy()
+        tr.destroy()
+    })
 </script>

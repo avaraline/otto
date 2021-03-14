@@ -6,11 +6,11 @@
     import Arc from './Arc.svelte'
     import Rect from './Rect.svelte'
 
-    import { walls } from '../store'
+    import { objects } from '../store'
 
-    let mywalls = [];
+    let myobjs = [];
 
-    walls.subscribe((t)=> {mywalls = t})
+    objects.subscribe((t)=> {myobjs = t})
 
     export let width = 300;
     export let height = 300;
@@ -23,16 +23,9 @@
 
 <Stage width={width} height={height} scale={scale}>
     <Layer>
-        {#each mywalls as w}
+        {#each myobjs as w}
             <Rect
-                x={w.x}
-                y={w.z}
-                w={w.w}
-                h={w.d}
-                fill={w.fill}
-                frame={w.frame}
-                midYaw={w.midYaw}
-                idx={w.idx}
+                props = {w}
                 />
         {/each}
     </Layer>
