@@ -6,26 +6,28 @@
     import Arc from './Arc.svelte'
     import Rect from './Rect.svelte'
 
-    import { objects } from '../store'
-
-    let myobjs = [];
-
-    objects.subscribe((t)=> {myobjs = t})
+    import { objects, bookmark} from '../store'
 
     export let width = 300;
     export let height = 300;
-    export let scale = {x: 3.0, y: 3.0};
 
     let container;
     onMount(() => {
     })
+
+    let thingclicked = (evt, props) => {
+        console.log(props)
+        bookmark.set(props.xpath)
+    }
+
 </script>
 
-<Stage width={width} height={height} scale={scale}>
+<Stage width={width} height={height}>
     <Layer>
-        {#each myobjs as w}
+        {#each $objects as o}
             <Rect
-                props = {w}
+                props = {o}
+                onClick = {thingclicked}
                 />
         {/each}
     </Layer>

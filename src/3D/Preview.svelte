@@ -28,7 +28,7 @@ import type { AvaraObject } from "../alf";
 
     //loadBSP(400).then((shape) => {wallMesh = shape})
     objects.subscribe((os) => {
-        os.map((w: AvaraObject, idx) => {
+        os.map((w, idx) => {
             if (w.x < minX) minX = w.x
             if (w.z < minZ) minZ = w.z
             if (w.x > maxX) maxX = w.x

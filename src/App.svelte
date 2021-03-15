@@ -43,7 +43,7 @@
 		<XMLEditor/>
 	</div>
 	<div id="preview2D" bind:this={preview2D}>
-		<MapEditor height={height_2d} width={width_2d} scale={scale_2d}/>
+		<MapEditor height={height_2d} width={width_2d}/>
 	</div>
 	<div id="preview3D" bind:this={preview3D}>
 		<Preview width={width_3d} height={height_3d}/>

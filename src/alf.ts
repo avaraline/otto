@@ -5,6 +5,7 @@ import {
     set_variable, 
     get_variable 
 } from './avarluation'
+import { xpath } from "./xpath"
 
 type Color = {
     fill: string
@@ -134,6 +135,7 @@ export function objectsFromMap(map_string:string): any {
     if (!map_string) return []
     let doc = new DOMParser().parseFromString(map_string, "text/xml")
     let themap = doc.querySelector("map")
+    if (!themap) return []
     let objects = new Array<AvaraObject> ()
     let _ = [...themap.children].forEach((elem, idx) => {
         switch (elem.tagName.toLowerCase()) {
@@ -147,7 +149,10 @@ export function objectsFromMap(map_string:string): any {
                 let w = getWall(elem)
                 ctx.lastRect = w
                 objects.push({
-                    ...w
+                    ...w,
+                    tag: elem,
+                    tag_string: elem.outerHTML,
+                    xpath: xpath(elem, false)
                 })
                 break
             case "ramp":

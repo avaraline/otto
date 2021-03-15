@@ -11,7 +11,6 @@ import PropUtils from 'svelthree/src/utils/PropUtils.svelte';
         fill: "#00ff00",
         frame: "#000000",
         strokeWidth: 1,
-        selected: false,
         radius: 0,
         midYaw: 0
     }
@@ -19,9 +18,10 @@ import PropUtils from 'svelthree/src/utils/PropUtils.svelte';
     export let onTransform = (x, y, newx, newy) => {}
     export let onClick = (evt, props) => {}
 
-    export let select = () => props.selected = true
-    export let unselect = () => props.selected = false
-    
+    let selected = false
+    export const select = () => selected = true
+    export const unselect = () => selected = false
+
     const { getLayer } = getContext("konva_layer")
     const layer = getLayer()
 
@@ -41,7 +41,7 @@ import PropUtils from 'svelthree/src/utils/PropUtils.svelte';
         rotation: props.midYaw ? props.midYaw + 90 : 0
     }}
     
-    let  rect = new Konva.Rect()
+    let rect = new Konva.Rect(rectprops())
     
     let tr = new Konva.Transformer({
         nodes: [rect],
@@ -56,7 +56,12 @@ import PropUtils from 'svelthree/src/utils/PropUtils.svelte';
     }
 
     rect.on('transform', wasTransformed)
-    rect.on('click', (ev) => { onClick(ev.evt, props)});
+    rect.on('click', (ev) => { 
+        console.log(rect)
+
+        selected = !selected
+        onClick(ev.evt, props) 
+    });
 
     onMount(() => {
         layer.add(rect)
@@ -67,7 +72,7 @@ import PropUtils from 'svelthree/src/utils/PropUtils.svelte';
 
     afterUpdate(() => {
         rect.setAttrs(rectprops())
-        if (props.selected) { 
+        if (selected) { 
             tr.show()
             tr.forceUpdate()
         }
