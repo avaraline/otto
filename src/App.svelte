@@ -1,41 +1,40 @@
 <script lang="ts">
-	import { onMount } from "svelte"
-	import MapEditor from "./2D/MapEditor.svelte"
-	import XMLEditor from "./XMLEditor.svelte"
-	import Preview from "./3D/Preview.svelte"
+import { onMount } from "svelte"
+import MapEditor from "./2D/MapEditor.svelte"
+import XMLEditor from "./XMLEditor.svelte"
+import Preview from "./3D/Preview.svelte"
 
-	import { objects, alfsource } from "./store"
-	import { loadText } from "./files";
-	import { objectsFromMap } from "./alf"
-	import { get_variable, is_defined, set_variable } from "./avarluation";
-
-	
-
-	let preview2D, preview3D, scale_2d
-	let width_2d, height_2d
-	let width_3d, height_3d
-
-	onMount(async () => {
-
-		loadText("grimoire.alf").then(s => {
-			width_2d = preview2D.offsetWidth
-			height_2d = preview2D.offsetHeight
-			width_3d = preview3D.offsetWidth
-			height_3d = preview3D.offsetHeight
-			scale_2d = 3.0//Math.min(preview2D.offsetWidth / map_width, 1.0);
+import { objects, alfsource } from "./store"
+import { loadText } from "./files";
+import { objectsFromMap } from "./alf"
+import { avaraluator_init_default } from "./avarluation";
 
 
-			alfsource.set(s)
-			alfsource.subscribe((s) => {
-				objects.set(objectsFromMap(s).filter(o => o));
-				console.log(objects)
-			})
-			
+
+let preview2D, preview3D, scale_2d
+let width_2d, height_2d
+let width_3d, height_3d
+
+onMount(async () => {
+	avaraluator_init_default()
+	loadText("grimoire.alf").then(async s => {
+		width_2d = preview2D.offsetWidth
+		height_2d = preview2D.offsetHeight
+		width_3d = preview3D.offsetWidth
+		height_3d = preview3D.offsetHeight
+		scale_2d = 3.0//Math.min(preview2D.offsetWidth / map_width, 1.0);
+
+
+		alfsource.set(s)
+		alfsource.subscribe(async (s) => {
+			objectsFromMap(s).then((o) => {
+				objects.set(o.filter(t => t))
+			}).catch((r) => console.log(r))
+			console.log(objects)
 		})
+		
 	})
-
-	
-	
+})
 </script>
 
 <main>

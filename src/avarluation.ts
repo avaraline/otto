@@ -118,7 +118,7 @@ export function avarluate_expression(expr_string: string): any {
 // but also updates the internal state of variables and names
 // for get_ and set_variable
 export function avarluate_script(script_text: string, object_callback: (object_data) => void = undefined): void {
-    console.log(script_text);
+    //console.log(script_text);
     parse(script_text).forEach((ins) => {
         switch(ins["type"]) {
             case "declaration":

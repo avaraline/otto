@@ -66,7 +66,6 @@ export default {
 			inlineSources: !production
 		}),
 		pegjs(),
-
 		// In dev mode, call `npm run start` once
 		// the bundle has been generated
 		!production && serve(),
