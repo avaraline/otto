@@ -16,6 +16,7 @@
     "@tsconfig/svelte": "^1.0.0",
     "@types/he": "^1.1.1",
     "@types/xmldoc": "^1.1.5",
+    "file-saver": "^2.0.5",
     "he": "^1.2.0",
     "konva": "^7.2.5",
     "rollup": "^2.3.4",
@@ -34,7 +35,10 @@
   },
   "dependencies": {
     "@types/three": "^0.126.0",
+    "rollup-plugin-postcss": "^4.0.0",
+    "sass": "^1.32.8",
     "sirv-cli": "^1.0.0",
+    "svelma": "^0.4.0",
     "xmldoc": "^1.1.2"
   }
 }

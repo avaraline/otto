@@ -5,7 +5,7 @@ import type { Wall } from '../alf';
 
 export let props:Wall
 
-export let onTransform = (x, y, newx, newy) => {}
+export let onTransform = (props) => {}
 export let onClick = (evt, props) => {}
 
 let selected = false
@@ -42,12 +42,15 @@ let tr = new Konva.Transformer({
 const wasTransformed = () => {
     const new_width = rect.width() * rect.scaleX()
     const new_height = rect.height() * rect.scaleY()
-    onTransform(rect.x, rect.y, new_width, new_height)
+    props.w = new_width
+    props.d = new_height
+    props.midYaw = rect.rotation() - 90
+    rect.setAttrs(props)
+    onTransform(props)
 }
 
 rect.on('transform', wasTransformed)
 rect.on('click', (ev) => { 
-    selected = !selected
     onClick(ev.evt, props) 
 });
 

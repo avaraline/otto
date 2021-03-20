@@ -7,6 +7,7 @@ import sveltePreprocess from 'svelte-preprocess';
 import typescript from '@rollup/plugin-typescript';
 import css from 'rollup-plugin-css-only';
 import pegjs from "rollup-plugin-pegjs";
+import postcss from 'rollup-plugin-postcss'
 
 const production = !process.env.ROLLUP_WATCH;
 
@@ -66,6 +67,7 @@ export default {
 			inlineSources: !production
 		}),
 		pegjs(),
+		postcss(),
 		// In dev mode, call `npm run start` once
 		// the bundle has been generated
 		!production && serve(),

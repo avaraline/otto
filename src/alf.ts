@@ -52,8 +52,12 @@ type Rect = {
 }
 
 type Arc = {
+    cx: number
+    cz: number
+    lastArcAngle: number
     extent: number
     angle: number
+    r: number
 }
 
 type Actor = Placed & Color
@@ -62,9 +66,18 @@ export type Wall = (Actor & Rect) & {
     midYaw: number
 }
 
+export type Goody = Arc & Color & {
+    y: number
+    shape: number
+    missiles: number
+    grenades: number
+    boosters: number
+    start: number
+    out: number
+}
+
 export type Ramp = Actor & Rect & Arc & {
     deltaY: number
-    lastArcAngle: number
 }
 
 export type AvaraObject = Actor & {
@@ -98,6 +111,20 @@ let ctx = {
     }
 }
 
+function getGoody(elem:Tag): Goody {
+    return {
+        ...getArc(elem),
+        ...getColors(elem),
+        start: attrExpr(elem, "start"),
+        out: attrExpr(elem, "out"),
+        grenades: attrExpr(elem, "grenades"),
+        boosters: attrExpr(elem, "boosters"),
+        missiles: attrExpr(elem, "missiles"),
+        y: attrExpr(elem, "y"),
+        shape: attrExpr(elem, "shape")
+    }
+}
+
 function getRamp(elem: Tag): Ramp {
     return {
         ...getColors(elem),
@@ -117,14 +144,17 @@ function getWall(elem: Tag): Wall {
     }
 }
 
-function getArc(elem: Tag) {
+function getArc(elem: Tag): Arc {
     let st = safeAttr(elem, "angle")
     let ex = safeAttr(elem, "extent")
     let laa = (720 - (parseInt(st) + (parseInt(ex) / 2))) % 360
     return {
         angle: st,
         extent: ex,
-        lastArcAngle: laa
+        lastArcAngle: laa,
+        r: safeAttr(elem, "r"),
+        cx: safeAttr(elem, "cx"),
+        cz: safeAttr(elem, "cz")
     }
 }
 
@@ -178,14 +208,14 @@ function attrExpr(elem, attr) {
     else return 0;
 }
 
-function tagToAvaraObject(f:Function, elem:Tag): AvaraObject {
+function tagToAvaraObject(f:Function, elem:Tag, count:number): AvaraObject {
     return {
         ...f(elem),
         tag: elem,
-        tag_string: elem.value,
         tag_start: elem.openStart,
         tag_end: elem.closeEnd,
-        tag_name: elem.name
+        tag_name: elem.name,
+        idx: count
     }
 }
 
@@ -199,6 +229,7 @@ export async function objectsFromMap(map_string:string): Promise<any> {
                 // text? script?
             }
             else if (event == SaxEventType.CloseTag) {
+                let count = objects.length;
                 switch(data.value.toLowerCase()) {
                     case "set":
                         data.attributes.map(a => {
@@ -211,11 +242,13 @@ export async function objectsFromMap(map_string:string): Promise<any> {
                         break
                     case "walldoor":
                     case "wall":
-                        objects.push(tagToAvaraObject(getWall, data))
+                        objects.push(tagToAvaraObject(getWall, data, count))
                         break
                     case "ramp":
-                        objects.push(tagToAvaraObject(getRamp, data))
+                        objects.push(tagToAvaraObject(getRamp, data, count))
                         break
+                    case "goody":
+                        objects.push(tagToAvaraObject(getGoody, data, count))
                 }
             }
         }

@@ -25,7 +25,7 @@ export function avaraluator_init_default() {
     variables = {}
     var_idx = 0
     unique_value = unique_start
-    loadText("default.avarascript").then((t) => {
+    loadText("./default.avarascript").then((t) => {
         avarluate_script(t);
     })
 }

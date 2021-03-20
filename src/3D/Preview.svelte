@@ -10,11 +10,9 @@ import {
     WebGLRenderer,
     AmbientLight,
     OrbitControls,
-    Vector3
+    Vector3,
+Material,
 } from "svelthree";
-
-import Camera from "svelthree/src/components/Camera.svelte";
-import type { AvaraObject } from "../alf";
 import { loadBSP } from  "../files"
 import { objects } from "../store"
 import Wall from "./Wall.svelte"
@@ -24,6 +22,8 @@ export let height = 500;
 
 let overX = 0, overY = 100, overZ = 0
 let minX = 0, maxX = 0, minZ = 0, maxZ = 0, maxY = 5
+
+
 
 //loadBSP(400).then((shape) => {wallMesh = shape})
 objects.subscribe((os) => {
@@ -39,12 +39,13 @@ objects.subscribe((os) => {
     overY = maxY
     overZ = (minZ + maxZ) / 2
 })
-
+let myscene:Scene
+export const getScene = () => myscene.getScene()
 
 </script>
 
 <Canvas let:sti w={width} h={height} interactive>
-    <Scene {sti} let:scene id="scene1" props={{ background: 0xedf2f7 }}>
+    <Scene {sti} let:scene bind:this={myscene} id="scene1" props={{ background: 0xedf2f7 }}>
         <PerspectiveCamera 
             {scene} 
             id="cam1" 
@@ -53,10 +54,25 @@ objects.subscribe((os) => {
         <AmbientLight {scene} props={{ position: [3, 3, 3] }} intensity={0.3}/>
         {#each $objects as props}
             {#if props.tag_name == "Wall" || props.tag_name == "WallDoor"}
-                <Wall {scene} {props}/>
+                <Wall {scene} {props} on:click={() => {console.log("aaaaaa")}}/>
                 
             {:else if props.tag_name == "Ramp"}
                 <Ramp {scene} {props}/>
+
+            {:else if props.tag_name == "Goody"}
+                <Mesh
+                interact
+                {scene}
+                geometry={new BoxBufferGeometry(1,1,1)}
+                material={new  MeshStandardMaterial()}
+                mat={{ color: props.fill }}
+                pos={[
+                    props.cx,
+                    props.y,
+                    props.cz
+                ]}          
+                on:click={(e) => { console.log("hello from goody" + props["idx"])}}
+        />
             {/if}
         {/each}
         

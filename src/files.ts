@@ -1,4 +1,4 @@
-import { BufferGeometry, Float32BufferAttribute, Mesh } from 'svelthree'
+import { BoxBufferGeometry, BufferGeometry, Float32BufferAttribute, Mesh } from 'svelthree'
 let meshes = {}
 let texts = {}
 
@@ -23,7 +23,7 @@ export let loadBSP = async function (id: number): Promise<Mesh>
     
 }
 
-let fetchBSP = async function (id: number) : Promise<void | BufferGeometry>
+let fetchBSP = async function (id: number) : Promise<BufferGeometry>
 {
     return fetch("bsps/" + id + ".json")
     .then(response => response.json())
@@ -47,5 +47,5 @@ let fetchBSP = async function (id: number) : Promise<void | BufferGeometry>
         gbuffa.setAttribute('normal', new Float32BufferAttribute(normals, 3).onUpload(() => { this.array = null }))
         gbuffa.setAttribute('color', new Float32BufferAttribute(colors, 1).onUpload(() => { this.array = null }))
         return gbuffa
-    })
+    }).catch(() => {return new BoxBufferGeometry(1, 1, 1)})
 }

@@ -64,12 +64,8 @@ let updateRamp = () => {
     }
 
     if (sy == 0) sy = 0.01
-    console.log({
-        props:props, 
-        heading:heading,
-        headingSign:headingSign,
-        sx:sx, 
-        sy:sy, sz:sz, rx:rx, rz:rz})
+
+    console.log(sy)
 }
 
 updateRamp()
@@ -79,6 +75,7 @@ let rampMat = new MeshStandardMaterial()
 </script>
     
 <Mesh
+    interact
     {scene}
     geometry={rampMesh}
     material={rampMat.clone()}

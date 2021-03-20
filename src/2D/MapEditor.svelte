@@ -35,10 +35,12 @@ let thingclicked = (evt, props:AvaraObject) => {
 <Stage width={width} height={height}>
     <Layer>
         {#each $objects as o}
+            {#if o["tag_name"] == "Ramp" || o["tag_name"] == "Wall" || o["tag_name"] == "WallDoor"}
             <Rect
                 props = {o}
                 onClick = {thingclicked}
                 />
+            {/if}
         {/each}
     </Layer>
 </Stage>

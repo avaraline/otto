@@ -13,22 +13,26 @@ export let scene
 
 let wallMesh = new BoxBufferGeometry(1, 1, 1);
 let wallMat = new MeshStandardMaterial()
+
+const min_thicc = 0.01
 </script>
 
 <Mesh
+    interact
     {scene}
     geometry={wallMesh}
     material={wallMat.clone()}
     mat={{ color: props.fill }}
     pos={[
-        props.x + props.w / 2,
-        props.y + props.h / 2,
-        props.z + props.d / 2
+        props.x + (props.w < min_thicc ? min_thicc : props.w / 2),
+        props.y + (props.h < min_thicc ? min_thicc : props.h / 2),
+        props.z + (props.d < min_thicc ? min_thicc : props.d / 2)
     ]}
     scale={[
-        props.w,
-        props.h,
-        props.d
+        props.w < min_thicc ? min_thicc : props.w,
+        props.h < min_thicc ? min_thicc : props.h,
+        props.d < min_thicc ? min_thicc : props.d,
     ]}
     rot = {[0, radians(props.midYaw), 0]}
+    on:click={() => { console.log("hello from block" + props["idx"])}}
 />
