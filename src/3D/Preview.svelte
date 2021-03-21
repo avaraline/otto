@@ -69,7 +69,7 @@ export const handleClick = (e) => {
             {/if}
         {/each}
         
-        <OrbitControls {scene} enableDamping props={{target: new Vector3(overX, overY, overZ)}} />
+        <!--<OrbitControls {scene} enableDamping props={{target: new Vector3(overX, overY, overZ)}} />-->
         <WebGLRenderer
                 {sti}
                 sceneId="scene1"

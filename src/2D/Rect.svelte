@@ -1,9 +1,9 @@
 <script lang="ts">
 import Konva from 'konva';
 import { onMount, getContext, onDestroy, afterUpdate } from 'svelte';
-import type { Wall } from '../alf';
+import type { AvaraObject, Wall } from '../alf';
 
-export let props:Wall
+export let props:Wall & AvaraObject
 
 export let onTransform = (props) => {}
 export let onClick = (evt, props) => {}

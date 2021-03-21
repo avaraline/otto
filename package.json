@@ -9,8 +9,6 @@
     "validate": "svelte-check"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^17.0.0",
-    "@rollup/plugin-node-resolve": "^11.0.0",
     "@rollup/plugin-typescript": "^8.0.0",
     "@svelte-parts/editor": "^0.0.18",
     "@tsconfig/svelte": "^1.0.0",
@@ -24,8 +22,8 @@
     "rollup-plugin-livereload": "^2.0.0",
     "rollup-plugin-pegjs": "^2.1.3",
     "rollup-plugin-svelte": "^7.0.0",
-    "rollup-plugin-terser": "^7.0.0",
     "sax-wasm": "^2.0.0",
+    "sirv-cli": "^1.0.0",
     "svelte": "^3.0.0",
     "svelte-check": "^1.0.0",
     "svelte-preprocess": "^4.0.0",
@@ -34,10 +32,12 @@
     "typescript": "^4.0.0"
   },
   "dependencies": {
+    "@rollup/plugin-commonjs": "^17.1.0",
+    "@rollup/plugin-node-resolve": "^11.2.0",
     "@types/three": "^0.126.0",
     "rollup-plugin-postcss": "^4.0.0",
+    "rollup-plugin-terser": "^7.0.2",
     "sass": "^1.32.8",
-    "sirv-cli": "^1.0.0",
     "svelma": "^0.4.0",
     "xmldoc": "^1.1.2"
   }

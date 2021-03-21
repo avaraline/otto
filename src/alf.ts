@@ -185,7 +185,7 @@ function getPlace(elem: Tag) {
 
 function getDims(elem: Tag) {
     let h = attrExpr(elem, "h", -1000)
-    if (h == -1000) h = ctx.wallHeight()
+    if (h == -1000 || h == 0) h = ctx.wallHeight()
     return {
         w: attrExpr(elem, "w"),
         d: attrExpr(elem, "d"),
@@ -232,6 +232,9 @@ export async function objectsFromMap(map_string:string): Promise<any> {
             else if (event == SaxEventType.CloseTag) {
                 let count = objects.length;
                 switch(data.value.toLowerCase()) {
+                    case "unique":
+                        avarluate_script(`unique ${data.attributes[0].value} end`)
+                        break
                     case "set":
                         data.attributes.map(a => {
                             let n = a.name;

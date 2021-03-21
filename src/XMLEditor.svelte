@@ -25,7 +25,6 @@ const dispatch = createEventDispatcher();
 let updating = false;
 
 let hilite = null
-let selectmark = null
 let selectdec = document.createElement("span")
 selectdec.setAttribute("style", "background: #e0e; display:block; height:10px; width: 10px; border-radius:5px;")
 
@@ -72,10 +71,16 @@ const accessEditor = editor => {
             let p = $objects[idx]
             let start = p["tag_start"]
             let end = p["tag_end"]
-            let pos = {"line": start.line, "ch": start.ch}
+            let pos = {"line": start.line, "ch": start.character}
             editor.setGutterMarker(start.line, "CodeMirror-linenumbers", selectdec)
             
-            hilite = editor.markText(start, end, {
+            hilite =editor.markText({
+                line: start.line,
+                ch: start.character
+            },{
+                line: end.line,
+                ch: end.character,
+            }, {
                 css: "background-color:#535"
             })
             editor.scrollIntoView(pos)
