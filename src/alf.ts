@@ -49,7 +49,7 @@ type Rect = {
     d: number
 }
 
-type Arc = {
+export type Arc = {
     cx: number
     cz: number
     lastArcAngle: number

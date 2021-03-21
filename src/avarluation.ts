@@ -1,4 +1,3 @@
-import { deg2rad } from './util'
 import { parse } from "./avarascript"
 import { loadText } from "./files"
 

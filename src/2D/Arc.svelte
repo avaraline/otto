@@ -1,6 +1,5 @@
 <script lang="ts">
 import Konva from 'konva'
-import type MouseEvent from 'konva'
 import { getContext, onDestroy } from 'svelte'
 
 export let x = 0

@@ -30,6 +30,7 @@ const open = () => {
 const loadfile = (f) => {
 	let r = new FileReader();
 	r.addEventListener("load", (e) => {
+		avaraluator_init_default()
 		alfsource.set(e.target.result)
 	})
 	r.readAsBinaryString(f[0])
@@ -77,6 +78,7 @@ onMount(async () => {
 
 		alfsource.set(s)
 		alfsource.subscribe(async (s) => {
+			avaraluator_init_default()
 			objectsFromMap(s).then((o) => {
 				objects.set(o.filter(t => t))
 			}).catch((r) => console.log(r))
