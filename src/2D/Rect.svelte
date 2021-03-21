@@ -1,5 +1,6 @@
 <script lang="ts">
 import Konva from 'konva';
+import type { RectConfig } from 'konva/types/shapes/Rect';
 import { onMount, getContext, onDestroy, afterUpdate } from 'svelte';
 import type { AvaraObject, Wall } from '../alf';
 
@@ -13,7 +14,7 @@ import { selected } from "../store"
 const { getLayer } = getContext("konva_layer")
 const layer = getLayer()
 
-let rectprops = () => { return {
+let rectprops = ():RectConfig => { return {
     x: props.x + (props.w / 2),
     y: props.z + (props.d / 2),
     width: props.w,

@@ -11,9 +11,6 @@ import { loadText } from "./files";
 import { objectsFromMap } from "./alf"
 import { avaraluator_init_default } from "./avarluation";
 import OpenDialog from "./OpenDialog.svelte"
-
-
-import { svelthreeStores } from "svelthree"
 import { sceneToSTL } from "./stl-export"
 import { saveAs } from "file-saver"
 

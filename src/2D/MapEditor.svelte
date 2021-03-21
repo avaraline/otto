@@ -6,7 +6,7 @@ import Layer from './Layer.svelte'
 import Arc from './Arc.svelte'
 import Rect from './Rect.svelte'
 
-import { objects, selected} from '../store'
+import { objects, selected } from '../store'
 import type { AvaraObject } from '../alf';
 
 export let width = 300;
@@ -27,10 +27,10 @@ let thingclicked = (evt, props:AvaraObject) => {
     <Layer>
         {#each $objects as o}
             {#if o["tag_name"] == "Ramp" || o["tag_name"] == "Wall" || o["tag_name"] == "WallDoor"}
-            <Rect
-                props = {o}
-                onClick = {thingclicked}
-                />
+                <Rect props={o} onClick={thingclicked} />
+            {/if}
+            {#if o["tag_name"] == "Goody"}
+                <Arc props={o} onClick={thingclicked} />
             {/if}
         {/each}
     </Layer>

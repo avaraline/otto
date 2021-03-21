@@ -43,7 +43,7 @@ objects.subscribe((os) => {
 let myscene:Scene
 export const getScene = () => myscene.getScene()
 
-export const handleClick = (e) => {
+export const handleClick = (e, props) => {
     console.log(e)
 };
 
@@ -59,13 +59,13 @@ export const handleClick = (e) => {
         <AmbientLight {scene} props={{ position: [3, 3, 3] }} intensity={0.3}/>
         {#each $objects as props}
             {#if props.tag_name == "Wall" || props.tag_name == "WallDoor"}
-                <Wall {scene} {props} on:click={handleClick}/>
+                <Wall {scene} {props} on:click={(e) => { handleClick(e, props) }}/>
                 
             {:else if props.tag_name == "Ramp"}
-                <Ramp {scene} {props} on:click={handleClick}/>
+                <Ramp {scene} {props} on:click={(e) => { handleClick(e, props) }}/>
 
             {:else if props.tag_name == "Goody"}
-                <Goody {scene} {props} on:click={handleClick}/>
+                <Goody {scene} {props} on:click={(e) => { handleClick(e, props) }}/>
             {/if}
         {/each}
         
