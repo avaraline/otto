@@ -12,7 +12,7 @@ export let loadText = async function (name: string): Promise<string>
 }
 
 
-export let loadBSP = async function (id: number): Promise<Mesh>
+export let loadBSP = async function (id: number): Promise<BufferGeometry>
 {
 
     if (meshes[id]) return meshes[id];
@@ -37,15 +37,15 @@ let fetchBSP = async function (id: number) : Promise<BufferGeometry>
                 for (const idx of tri) {
                     Array.prototype.push.apply(positions, data.points[idx])
                     Array.prototype.push.apply(normals, poly.normal)
-                    Array.prototype.push.apply(colors, poly.color)
+                    Array.prototype.push.apply(colors, [poly.color])
                 }
             }
         }
 
         let gbuffa = new BufferGeometry();
-        gbuffa.setAttribute('position', new Float32BufferAttribute(positions, 3).onUpload(() => { this.array = null }))
-        gbuffa.setAttribute('normal', new Float32BufferAttribute(normals, 3).onUpload(() => { this.array = null }))
-        gbuffa.setAttribute('color', new Float32BufferAttribute(colors, 1).onUpload(() => { this.array = null }))
+        gbuffa.setAttribute('position', new Float32BufferAttribute(positions, 3))
+        gbuffa.setAttribute('normal', new Float32BufferAttribute(normals, 3))
+        gbuffa.setAttribute('color', new Float32BufferAttribute(colors, 1))
         return gbuffa
-    }).catch(() => {return new BoxBufferGeometry(1, 1, 1)})
+    }).catch((e) => { console.error(e); return new BoxBufferGeometry(1, 1, 1)})
 }

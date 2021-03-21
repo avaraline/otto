@@ -8,9 +8,7 @@ export let props:Wall
 export let onTransform = (props) => {}
 export let onClick = (evt, props) => {}
 
-let selected = false
-export const select = () => selected = true
-export const unselect = () => selected = false
+import { selected } from "../store"
 
 const { getLayer } = getContext("konva_layer")
 const layer = getLayer()
@@ -45,12 +43,13 @@ const wasTransformed = () => {
     props.w = new_width
     props.d = new_height
     props.midYaw = rect.rotation() - 90
-    rect.setAttrs(props)
+    //rect.setAttrs(props)
     onTransform(props)
 }
 
 rect.on('transform', wasTransformed)
 rect.on('click', (ev) => { 
+    selected.set([props.idx])
     onClick(ev.evt, props) 
 });
 
@@ -63,7 +62,7 @@ onMount(() => {
 
 afterUpdate(() => {
     rect.setAttrs(rectprops())
-    if (selected) { 
+    if ($selected.includes(props.idx)) { 
         tr.show()
         tr.forceUpdate()
     }

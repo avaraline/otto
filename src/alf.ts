@@ -1,4 +1,3 @@
-import { attr } from 'svelte/internal'
 import { 
     avarluate_expression, 
     avarluate_script, 
@@ -7,7 +6,6 @@ import {
     get_variable, 
     avarluate
 } from './avarluation'
-import { xpath } from "./xpath"
 import { Tag, SaxEventType, SAXParser, Position } from 'sax-wasm';
 import { decode } from "he"
 
@@ -74,6 +72,7 @@ export type Goody = Arc & Color & {
     boosters: number
     start: number
     out: number
+    speed: number
 }
 
 export type Ramp = Actor & Rect & Arc & {
@@ -85,7 +84,7 @@ export type AvaraObject = Actor & {
     tag_string: string
     tag_start: Position
     tag_end: Position
-    
+    idx: number
 }
 
 let ctx = {
@@ -121,7 +120,8 @@ function getGoody(elem:Tag): Goody {
         boosters: attrExpr(elem, "boosters"),
         missiles: attrExpr(elem, "missiles"),
         y: attrExpr(elem, "y"),
-        shape: attrExpr(elem, "shape")
+        shape: attrExpr(elem, "shape"),
+        speed: attrExpr(elem, "speed")
     }
 }
 
@@ -174,8 +174,8 @@ function getColors(elem: Tag) {
 }
 
 function getPlace(elem: Tag) {
-    let y = attrExpr(elem, "y")
-    if (!y) y = ctx.wa()
+    let y = attrExpr(elem, "y", -1000)
+    if (y == -1000) y = ctx.wa()
     return {
         x: attrExpr(elem, "x"),
         y: y,
@@ -184,8 +184,8 @@ function getPlace(elem: Tag) {
 }
 
 function getDims(elem: Tag) {
-    let h = attrExpr(elem, "h")
-    if (!h || h == 0) h = ctx.wallHeight()
+    let h = attrExpr(elem, "h", -1000)
+    if (h == -1000) h = ctx.wallHeight()
     return {
         w: attrExpr(elem, "w"),
         d: attrExpr(elem, "d"),
@@ -201,9 +201,10 @@ function safeAttr(elem:Tag, attr, thedefault:any = 0) {
     return thedefault
 }
 
-function attrExpr(elem, attr) {
-    let val = safeAttr(elem, attr, "")
+function attrExpr(elem, attr, thedefault:any = 0) {
+    let val = safeAttr(elem, attr, thedefault)
     let result = avarluate_expression(val);
+    if (Array.isArray(result) && result.length == 0) return 0
     if (result) return result;
     else return 0;
 }
@@ -238,7 +239,6 @@ export async function objectsFromMap(map_string:string): Promise<any> {
                             v = decode(v.value)
                             avarluate_script(`${n} = ${v}`)
                         })
-
                         break
                     case "walldoor":
                     case "wall":

@@ -8,6 +8,7 @@ import {
 import { afterUpdate } from "svelte"
 import { radians } from "../util"
 import type { AvaraObject, Ramp } from "../alf";
+import { selected } from "../store"
 
 export let props:(AvaraObject & Ramp) 
 export let scene
@@ -43,7 +44,7 @@ let updateRamp = () => {
     if(props.lastArcAngle < 0) throw 'what';
     let heading = props.lastArcAngle  / 360;
     sx = props.w
-    sy = props.h 
+    sy = props.h
     sz = props.d
 
     rx = 0
@@ -64,13 +65,22 @@ let updateRamp = () => {
     }
 
     if (sy == 0) sy = 0.01
-
-    console.log(sy)
+    console.log(props)
+    console.log("Ramp solution:", {
+        scale: [sx, sy, sz],
+        rot: [rx, 0, rz],
+        heading: heading,
+        pos: [
+            props.x + props.w / 2,
+            props.y + props.h / 2 + (props.deltaY / 2),
+            props.z + props.d / 2
+        ]
+    })
 }
 
 updateRamp()
 afterUpdate(updateRamp)
-let rampMesh = new BoxBufferGeometry(1, 1, 1)// new BoxBufferGeometry(sx, sy, sz);
+let rampMesh = new BoxBufferGeometry(1, 1, 1)
 let rampMat = new MeshStandardMaterial()
 </script>
     
@@ -87,5 +97,5 @@ let rampMat = new MeshStandardMaterial()
     ]}
     scale={[sx, sy, sz]}
     rot={[rx, 0, rz]}
-    on:click={() => {console.log(props.lastArcAngle / 360)}}
+    on:click
 />

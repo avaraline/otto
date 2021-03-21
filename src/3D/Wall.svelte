@@ -6,9 +6,11 @@ import {
 } from "svelthree"
 import { radians } from "../util"
 import type { Wall } from "../alf"
+import { selected } from "../store"
 
 export let props:Wall
 export let scene
+export const onClick = undefined
 
 
 let wallMesh = new BoxBufferGeometry(1, 1, 1);
@@ -34,5 +36,5 @@ const min_thicc = 0.01
         props.d < min_thicc ? min_thicc : props.d,
     ]}
     rot = {[0, radians(props.midYaw), 0]}
-    on:click={() => { console.log("hello from block" + props["idx"])}}
+    on:click={() => {selected.set([props.idx])}}
 />

@@ -67,7 +67,7 @@ let selected = [];
 
 onMount(async () => {
 	avaraluator_init_default()
-	loadText("./grimoire.alf").then(async s => {
+	loadText("./bwadi.alf").then(async s => {
 		width_2d = preview2D.offsetWidth
 		height_2d = preview2D.offsetHeight
 		width_3d = preview3D.offsetWidth
@@ -81,13 +81,14 @@ onMount(async () => {
 				objects.set(o.filter(t => t))
 			}).catch((r) => console.log(r))
 			console.log(objects)
-		})
-		
-		
-	})
-
-	
+		})	
+	})	
 })
+
+const handle3DClick = (e, props) => {
+	console.log(props);
+}
+
 </script>
 
 <main>
@@ -104,7 +105,7 @@ onMount(async () => {
 		<MapEditor height={height_2d} width={width_2d}/>
 	</div>
 	<div id="preview3D" bind:this={preview3D}>
-		<Preview bind:this={mypreview} width={width_3d} height={height_3d}/>
+		<Preview bind:this={mypreview} width={width_3d} height={height_3d} handleClick={handle3DClick}/>
 	</div>
 	<Modal bind:active={openDialog}>
 		<OpenDialog onChoose={loadfromdb} onFile={loadfile}></OpenDialog>

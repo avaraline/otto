@@ -3,7 +3,7 @@ import CodeMirror from '@svelte-parts/editor/codemirror'
 import 'codemirror/mode/xml/xml'
 import 'codemirror/lib/codemirror.css'
 import 'codemirror/theme/monokai.css'
-import { alfsource, bookmark } from './store'
+import { alfsource, objects, selected } from './store'
 import { createEventDispatcher } from 'svelte';
 
 export let theme = 'monokai'
@@ -64,15 +64,21 @@ const accessEditor = editor => {
         if (!updating)
         editor.setValue(d)
     })
-    bookmark.subscribe(d => {
-        if (d.start.line == 0 && d.start.ch == 0 && d.end.line == 0 && d.end.ch == 0) return
+    selected.subscribe(ps => {
+
         editor.clearGutter("CodeMirror-linenumbers");
-        let pos = {"line": d.start.line, "ch": d.start.ch}
-        selectmark = editor.setGutterMarker(d.start.line, "CodeMirror-linenumbers", selectdec)
-        //editor.scrollIntoView(pos)
         if(hilite) hilite.clear()
-        hilite = editor.markText(d.start, d.end, {
-            css: "background-color:#535"
+        ps.map((idx) => {
+            let p = $objects[idx]
+            let start = p["tag_start"]
+            let end = p["tag_end"]
+            let pos = {"line": start.line, "ch": start.ch}
+            editor.setGutterMarker(start.line, "CodeMirror-linenumbers", selectdec)
+            
+            hilite = editor.markText(start, end, {
+                css: "background-color:#535"
+            })
+            editor.scrollIntoView(pos)
         })
     })
 }

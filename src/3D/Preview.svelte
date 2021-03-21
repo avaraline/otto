@@ -1,4 +1,5 @@
 <script lang="ts">
+import { createEventDispatcher } from "svelte"
 import {
     Canvas,
     Scene,
@@ -13,10 +14,10 @@ import {
     Vector3,
 Material,
 } from "svelthree";
-import { loadBSP } from  "../files"
 import { objects } from "../store"
 import Wall from "./Wall.svelte"
 import Ramp from "./Ramp.svelte"
+import Goody from "./Goody.svelte"
 export let width = 800;
 export let height = 500;
 
@@ -42,6 +43,10 @@ objects.subscribe((os) => {
 let myscene:Scene
 export const getScene = () => myscene.getScene()
 
+export const handleClick = (e) => {
+    console.log(e)
+};
+
 </script>
 
 <Canvas let:sti w={width} h={height} interactive>
@@ -54,25 +59,13 @@ export const getScene = () => myscene.getScene()
         <AmbientLight {scene} props={{ position: [3, 3, 3] }} intensity={0.3}/>
         {#each $objects as props}
             {#if props.tag_name == "Wall" || props.tag_name == "WallDoor"}
-                <Wall {scene} {props} on:click={() => {console.log("aaaaaa")}}/>
+                <Wall {scene} {props} on:click={handleClick}/>
                 
             {:else if props.tag_name == "Ramp"}
-                <Ramp {scene} {props}/>
+                <Ramp {scene} {props} on:click={handleClick}/>
 
             {:else if props.tag_name == "Goody"}
-                <Mesh
-                interact
-                {scene}
-                geometry={new BoxBufferGeometry(1,1,1)}
-                material={new  MeshStandardMaterial()}
-                mat={{ color: props.fill }}
-                pos={[
-                    props.cx,
-                    props.y,
-                    props.cz
-                ]}          
-                on:click={(e) => { console.log("hello from goody" + props["idx"])}}
-        />
+                <Goody {scene} {props} on:click={handleClick}/>
             {/if}
         {/each}
         
