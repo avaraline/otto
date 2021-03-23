@@ -6,22 +6,24 @@ import {
 } from "svelthree"
 import type { BufferGeometry } from "svelthree-three"
 
-import { onMount } from 'svelte';
+import { createEventDispatcher, onMount } from 'svelte';
 import { radians } from "../util"
 import type { Goody } from "../alf"
 import { loadBSP } from "../files";
 
 export let props:Goody
 export let scene
-export const onClick = undefined
 
+
+const dispatch = createEventDispatcher();
+let onClick = (e, props) => {
+    dispatch('clicked', {event: e, props: props})}
 
 let geom:BufferGeometry = new BoxBufferGeometry(1, 1, 1)
 let mat = new MeshStandardMaterial()
 
 onMount(() => {
     loadBSP(props["shape"]).then((s) => {
-        console.log(s)
         geom = s;
     })
 })
@@ -71,5 +73,5 @@ const rotator = (obj) => {
     ]}
     animation={rotator}
     aniauto
-    on:click}
+    on:click={(e) => { onClick(e, props)}}
 />

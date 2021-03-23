@@ -5,13 +5,17 @@ import {
     Mesh
 } from "svelthree"
 
-import { afterUpdate } from "svelte"
+import { afterUpdate, createEventDispatcher } from "svelte"
 import { radians } from "../util"
 import type { AvaraObject, Ramp } from "../alf";
 import { selected } from "../store"
 
 export let props:(AvaraObject & Ramp) 
 export let scene
+
+const dispatch = createEventDispatcher();
+let onClick = (e, props) => {
+    dispatch('clicked', {event: e, props: props})}
 
 const solveOrientation = (x:number, y:number, h:number): {w:number, angle:number} => {
     var minGuess = -(0x3C00 / 65536),
@@ -42,7 +46,7 @@ let rx = 0, rz = 0;
 
 let updateRamp = () => {
     if(props.lastArcAngle < 0) throw 'what';
-    let heading = props.lastArcAngle  / 360;
+    let heading = props.lastArcAngle / 360
     sx = props.w
     sy = props.h
     sz = props.d
@@ -97,5 +101,5 @@ let rampMat = new MeshStandardMaterial()
     ]}
     scale={[sx, sy, sz]}
     rot={[rx, 0, rz]}
-    on:click
+    on:click={(e) => { onClick(e, props) }}
 />

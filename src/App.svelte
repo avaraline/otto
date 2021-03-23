@@ -6,9 +6,9 @@ import Preview from "./3D/Preview.svelte"
 import 'bulma/css/bulma.css'
 import { Snackbar, Modal, Button, Collapse } from "svelma"
 
-import { objects, alfsource } from "./store"
+import { objects, alfsource, selected, editing } from "./store"
 import { loadText } from "./files";
-import { objectsFromMap } from "./alf"
+import { avaraObjectToTag, objectsFromMap } from "./alf"
 import { avaraluator_init_default } from "./avarluation";
 import OpenDialog from "./OpenDialog.svelte"
 import { sceneToSTL } from "./stl-export"
@@ -57,11 +57,58 @@ const notify = (text:string, type:string):void => {
 	})
 }
 
+const in_place_update = (obj) => {
+	objects.set($objects.map((o) => {
+		if (o.idx == obj.idx) return obj;
+		else return o;
+	}))
+	var lines = $alfsource.split('\n')
+	let start = 0, end = 0
+	for (let i = 0; i < obj.tag_end.line; i++) {
+		if (i < obj.tag_start.line)
+			start = start + lines[i].length + 1
+		if (i < obj.tag_end.line)
+			end = end + lines[i].length + 1
+	}
+	start += obj.tag_start.character
+	end += obj.tag_end.character
+	console.log(start, end);
+	var newsource = 
+		$alfsource.substr(0, start) + 
+		avaraObjectToTag(obj) + 
+		$alfsource.substr(end, $alfsource.length)
+	console.log($alfsource.substr(start, end))
+	alfsource.set(newsource)
+	selected.set($selected)
+}
+
+const move = (e:CustomEvent) => {
+	console.log("moved", e)
+	let current = $objects[e.detail.props.idx]
+	let newprops = e.detail.props
+	let xdiff = newprops.x - current.x
+	let ydiff = newprops.z - current.z
+	in_place_update(newprops)
+}
+
+const select = (e:CustomEvent):void => {
+	let obj = e.detail.props
+	if (e.detail.event.shiftKey) {
+		if ($selected.includes(obj.idx))
+			selected.set($selected.filter((i) => i != obj.idx))
+		else selected.set([...$selected, obj.idx])
+	}
+	else selected.set([obj.idx])
+}
+
+const transform = (e:CustomEvent):void => {
+	console.log("transformed", e)
+	in_place_update(e.detail.props)
+}
+
 const problem = (e) : void => notify(e.detail.error, "is-danger")
 
 let mypreview:Preview
-
-let selected = [];
 
 onMount(async () => {
 	avaraluator_init_default()
@@ -75,6 +122,7 @@ onMount(async () => {
 
 		alfsource.set(s)
 		alfsource.subscribe(async (s) => {
+			if ($editing) return;
 			avaraluator_init_default()
 			objectsFromMap(s).then((o) => {
 				objects.set(o.filter(t => t))
@@ -101,10 +149,20 @@ const handle3DClick = (e, props) => {
 		<XMLEditor on:xmlparsefailure={problem}/>
 	</div>
 	<div id="preview2D" bind:this={preview2D}>
-		<MapEditor height={height_2d} width={width_2d}/>
+		<MapEditor 
+			height={height_2d} 
+			width={width_2d}
+			on:clicked={select}
+			on:moved={move}
+			on:transformed={transform}/>
 	</div>
 	<div id="preview3D" bind:this={preview3D}>
-		<Preview bind:this={mypreview} width={width_3d} height={height_3d} handleClick={handle3DClick}/>
+		<Preview 
+			bind:this={mypreview} 
+			width={width_3d} 
+			height={height_3d} 
+			on:clicked={select}
+			/>
 	</div>
 	<Modal bind:active={openDialog}>
 		<OpenDialog onChoose={loadfromdb} onFile={loadfile}></OpenDialog>

@@ -7,7 +7,8 @@ import Arc from './Arc.svelte'
 import Rect from './Rect.svelte'
 
 import { objects, selected } from '../store'
-import type { AvaraObject } from '../alf';
+import type { AvaraObject, Wall, Ramp, Goody } from '../alf';
+import Ramp2D from './Ramp2D.svelte';
 
 export let width = 300;
 export let height = 300;
@@ -15,26 +16,22 @@ export let height = 300;
 let container;
 onMount(() => {
 })
-
-let thingclicked = (evt, props:AvaraObject) => {
-    console.log(props)
-    selected.set([props.idx])
-}
-
 </script>
 
 <Stage width={width} height={height}>
     <Layer>
-        {#each $objects as o}
-            {#if o["tag_name"] == "Ramp" || o["tag_name"] == "Wall" || o["tag_name"] == "WallDoor"}
-                <Rect props={o} onClick={thingclicked} />
+        {#each $objects as props}
+            {#if props["tag_name"] == "Wall" || props["tag_name"] == "WallDoor"}
+                <Rect {props} on:clicked on:transformed on:moved />
+            {:else if props["tag_name"] == "Ramp"}
+                <Ramp2D {props} on:clicked on:transformed on:moved />
             {/if}
         {/each}
     </Layer>
     <Layer>
         {#each $objects as o}
             {#if o["tag_name"] == "Goody"}
-                <Arc props={o} onClick={thingclicked} />
+                <Arc props={o}/>
             {/if}
         {/each}
     </Layer>

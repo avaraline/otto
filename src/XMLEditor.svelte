@@ -3,7 +3,7 @@ import CodeMirror from '@svelte-parts/editor/codemirror'
 import 'codemirror/mode/xml/xml'
 import 'codemirror/lib/codemirror.css'
 import 'codemirror/theme/monokai.css'
-import { alfsource, objects, selected } from './store'
+import { alfsource, objects, selected, editing} from './store'
 import { createEventDispatcher } from 'svelte';
 
 export let theme = 'monokai'
@@ -30,41 +30,29 @@ selectdec.setAttribute("style", "background: #e0e; display:block; height:10px; w
 
 let dbtime = 0;
 
+let handleChange = (editor, change) => {
+    if (updating || $editing) return;
+    updating = true;
+    console.log(change)
+    const testDom = new DOMParser().parseFromString(editor.getValue(), 'application/xml');
+    let result = false;
+    let errortag = testDom.getElementsByTagName('parsererror');
+    if (errortag.length > 0) {
+        let anerror = errortag[0].getElementsByTagName('div')[0].innerText;
+        // let line = parseInt(anerror.match(/line\s([0-9]+)/)[1])
+        dispatch('xmlparsefailure', {
+            'error': anerror
+        })
+    }
+    else {
+        alfsource.set(editor.getValue())
+    }
 
+    if (onChange) onChange(change)
+    updating = false;
+}
 
-const accessEditor = editor => {
-    editor.setSize('100%', '100%')
-    editor.on('change', (editor, change) => {
-        if (updating) return;
-        updating = true;
-        console.log(change)
-        const testDom = new DOMParser().parseFromString(editor.getValue(), 'application/xml');
-        let result = false;
-        let errortag = testDom.getElementsByTagName('parsererror');
-        if (errortag.length > 0) {
-            let anerror = errortag[0].getElementsByTagName('div')[0].innerText;
-            // let line = parseInt(anerror.match(/line\s([0-9]+)/)[1])
-            dispatch('xmlparsefailure', {
-                'error': anerror
-            })
-        }
-        else {
-            alfsource.set(editor.getValue())
-        }
-
-        if (onChange) onChange(change)
-        updating = false;
-    })
-
-    editor.on('cursorActivity', (editor) => {
-        
-    })
-    alfsource.subscribe(d => {
-        if (!updating)
-        editor.setValue(d)
-    })
-    selected.subscribe(ps => {
-
+let handleSelect = (ps, editor) => {
         editor.clearGutter("CodeMirror-linenumbers");
         if(hilite) hilite.clear()
         ps.map((idx) => {
@@ -85,6 +73,24 @@ const accessEditor = editor => {
             })
             editor.scrollIntoView(pos)
         })
+    }
+
+export let cmeditor
+
+const accessEditor = editor => {
+    cmeditor = editor
+    editor.setSize('100%', '100%')
+    editor.on('change', (editor, e) => { handleChange(editor, e) })
+    editor.on('cursorActivity', (editor) => {
+        
+    })
+    alfsource.subscribe(d => {
+        if (!updating)
+        editor.setValue(d)
+        handleSelect($selected, editor);
+    })
+    selected.subscribe((ps) => {
+        handleSelect(ps, editor);
     })
 }
 </script>

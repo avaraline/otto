@@ -5,12 +5,16 @@ import {
     Mesh
 } from "svelthree"
 import { radians } from "../util"
-import type { Wall } from "../alf"
+import type { AvaraObject, Wall } from "../alf"
 import { selected } from "../store"
+import { createEventDispatcher } from "svelte";
 
-export let props:Wall
+export let props:Wall & AvaraObject
 export let scene
-export const onClick = undefined
+
+const dispatch = createEventDispatcher();
+let onClick = (e, props) => {
+    dispatch('clicked', {event: e, props: props})}
 
 
 let wallMesh = new BoxBufferGeometry(1, 1, 1);
@@ -36,5 +40,5 @@ const min_thicc = 0.01
         props.d < min_thicc ? min_thicc : props.d,
     ]}
     rot = {[0, radians(props.midYaw), 0]}
-    on:click={() => {selected.set([props.idx])}}
+    on:click={(e) => { onClick(e, props)}}
 />

@@ -43,10 +43,6 @@ objects.subscribe((os) => {
 let myscene:Scene
 export const getScene = () => myscene.getScene()
 
-export const handleClick = (e, props) => {
-    console.log(e)
-};
-
 </script>
 
 <Canvas let:sti w={width} h={height} interactive>
@@ -59,13 +55,13 @@ export const handleClick = (e, props) => {
         <AmbientLight {scene} props={{ position: [3, 3, 3] }} intensity={0.3}/>
         {#each $objects as props}
             {#if props.tag_name == "Wall" || props.tag_name == "WallDoor"}
-                <Wall {scene} {props} on:click={(e) => { handleClick(e, props) }}/>
+                <Wall {scene} {props} on:clicked />
                 
             {:else if props.tag_name == "Ramp"}
-                <Ramp {scene} {props} on:click={(e) => { handleClick(e, props) }}/>
+                <Ramp {scene} {props} on:clicked />
 
             {:else if props.tag_name == "Goody"}
-                <Goody {scene} {props} on:click={(e) => { handleClick(e, props) }}/>
+                <Goody {scene} {props} on:clicked />
             {/if}
         {/each}
         

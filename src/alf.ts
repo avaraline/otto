@@ -2,9 +2,7 @@ import {
     avarluate_expression, 
     avarluate_script, 
     is_defined, 
-    set_variable, 
-    get_variable, 
-    avarluate
+    get_variable
 } from './avarluation'
 import { Tag, SaxEventType, SAXParser, Position } from 'sax-wasm';
 import { decode } from "he"
@@ -81,7 +79,7 @@ export type Ramp = Actor & Rect & Arc & {
 
 export type AvaraObject = Actor & {
     tag: Tag
-    tag_string: string
+    tag_name: string
     tag_start: Position
     tag_end: Position
     idx: number
@@ -149,12 +147,12 @@ function getArc(elem: Tag): Arc {
     let ex = safeAttr(elem, "extent")
     let laa = (720 - (parseInt(st) + (parseInt(ex) / 2))) % 360
     return {
-        angle: st,
-        extent: ex,
+        angle: parseFloat(st),
+        extent: parseFloat(ex),
         lastArcAngle: laa,
-        r: safeAttr(elem, "r"),
-        cx: safeAttr(elem, "cx"),
-        cz: safeAttr(elem, "cz")
+        r: parseFloat(safeAttr(elem, "r")),
+        cx: parseFloat(safeAttr(elem, "cx")),
+        cz: parseFloat(safeAttr(elem, "cz"))
     }
 }
 
@@ -207,6 +205,17 @@ function attrExpr(elem, attr, thedefault:any = 0) {
     if (Array.isArray(result) && result.length == 0) return 0
     if (result) return result;
     else return 0;
+}
+
+let internalkeys = ['tag', 'tag_start', 'tag_end', 'tag_name', 'idx']
+const isInternalKey = (key) => internalkeys.includes(key)
+
+export const avaraObjectToTag = (obj) => {
+	let attrs = ""
+    for (const k in obj)
+        if(!isInternalKey(k))
+            attrs += `${k}="${obj[k]}" `
+	return `<${obj.tag_name} ${attrs}/>`;
 }
 
 function tagToAvaraObject(f:Function, elem:Tag, count:number): AvaraObject {
