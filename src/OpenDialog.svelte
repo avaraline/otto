@@ -82,7 +82,9 @@ onMount(() => {
 			})
 			leveldb.push(res)
 		})
-        leveldb = leveldb;
+        leveldb = leveldb.sort((a, b) => { 
+            return a.name.toUpperCase() > b.name.toUpperCase() ? 1 : -1
+        });
 	})
 });
 </script>
