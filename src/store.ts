@@ -16,6 +16,6 @@ export const xmlupdate = writable({
     tag: ""
 })
 
-export const skyColor = writable("#f0f")
-export const horizonColor = writable("#00f")
-export const groundColor = writable("#FF0")
+export const skyColor = writable("#003")
+export const horizonColor = writable("#00C")
+export const groundColor = writable("#003")
