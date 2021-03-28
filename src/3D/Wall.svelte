@@ -4,7 +4,7 @@ import {
     BoxBufferGeometry,
     Mesh
 } from "svelthree"
-import { radians } from "../util"
+import { getColorMat, radians, wallMesh } from "../util"
 import type { AvaraObject, Wall } from "../alf"
 import { selected } from "../store"
 import { createEventDispatcher } from "svelte";
@@ -17,18 +17,16 @@ let onClick = (e, props) => {
     dispatch('clicked', {event: e, props: props})}
 
 
-let wallMesh = new BoxBufferGeometry(1, 1, 1);
-let wallMat = new MeshStandardMaterial()
 
 const min_thicc = 0.01
+
 </script>
 
 <Mesh
     interact
     {scene}
     geometry={wallMesh}
-    material={wallMat.clone()}
-    mat={{ color: props.fill }}
+    material={getColorMat(props.fill)}
     pos={[
         props.x + (props.w < min_thicc ? min_thicc : props.w / 2),
         props.y + (props.h < min_thicc ? min_thicc : props.h / 2),

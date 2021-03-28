@@ -6,6 +6,7 @@ import {
 } from './avarluation'
 import { Tag, SaxEventType, SAXParser, Position } from 'sax-wasm';
 import { decode } from "he"
+import { skyColor, horizonColor, groundColor } from './store'
 
 let parser
 let parser_loaded = false
@@ -28,7 +29,6 @@ async function loadAndPrepareWasm() {
         return parser;
     }
 }
-
 
 type Color = {
     fill: string
@@ -241,15 +241,29 @@ export async function objectsFromMap(map_string:string): Promise<any> {
             else if (event == SaxEventType.CloseTag) {
                 let count = objects.length;
                 switch(data.value.toLowerCase()) {
+                    case "skycolor":
+                        let scol = getColors(data)
+                        skyColor.set(scol.frame)
+                        horizonColor.set(scol.fill)
+                        break;
+                    case "groundcolor":
+                        let gcol = getColors(data)
+                        groundColor.set(gcol.fill)
+                        break;
                     case "unique":
                         avarluate_script(`unique ${data.attributes[0].value} end`)
                         break
                     case "set":
                         data.attributes.map(a => {
-                            let n = a.name;
+                            let n = a.name + "";
                             let v = a.value;
                             v = decode(v.value)
-                            avarluate_script(`${n} = ${v}`)
+                            if (n.startsWith("light")) {
+                                n = n.replace(/\.([0-9])\./, "[$1].")
+                            }
+                            let scr = `${n} = ${v}`
+                            //console.log(scr)
+                            avarluate_script(scr)
                         })
                         break
                     case "walldoor":

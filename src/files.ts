@@ -11,16 +11,13 @@ export let loadText = async function (name: string): Promise<string>
     }
 }
 
-
 export let loadBSP = async function (id: number): Promise<BufferGeometry>
 {
-
     if (meshes[id]) return meshes[id];
     else {
         meshes[id] = await fetchBSP(id);
         return meshes[id];
-    }
-    
+    }  
 }
 
 let fetchBSP = async function (id: number) : Promise<BufferGeometry>

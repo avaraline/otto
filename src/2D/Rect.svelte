@@ -1,10 +1,11 @@
 <script lang="ts">
 import Konva from 'konva';
-import type { ArrowConfig } from 'konva/types/shapes/Arrow';
 import type { RectConfig } from 'konva/types/shapes/Rect';
+import type { Box } from 'konva/types/shapes/Transformer';
 import { onMount, getContext, onDestroy, afterUpdate } from 'svelte';
 import { createEventDispatcher } from 'svelte'
 import type { AvaraObject, Wall, Ramp } from '../alf';
+import { selected } from "../store"
 
 export let props:Wall & Ramp & AvaraObject
 
@@ -15,9 +16,6 @@ export let onClick = (e, props) => {
     dispatch('clicked', {event: e, props: props})}
 export let onMove = (e, props) => {
     dispatch('moved', {event: e, props: props})}
-
-import { selected } from "../store"
-import invert from "invert-color"
 
 const { getLayer } = getContext("konva_layer")
 const layer = getLayer()
@@ -34,8 +32,8 @@ let rectprops = ():RectConfig => { return {
     stroke: props.frame,
     strokeWidth: 1,
     strokeScaleEnabled: false,
-    //cornerRadius: props.radius ?? 0,
-    rotation: props.midYaw ? props.midYaw + 90 : 0
+    scale: {x: 1, y: 1},
+    rotation: -props.midYaw
 }}
 
 let rect = new Konva.Rect(rectprops())
@@ -50,24 +48,30 @@ rect.on('click', (ev) => {
     onClick(ev.evt, props) 
 });
 
-rect.on('dragend', (ev) => {
+rect.on('dragmove dragend', (ev) => {
     let newprops = props
     newprops.x = rect.x() - rect.offsetX()
     newprops.z = rect.y() - rect.offsetY()
     onMove(ev.evt, newprops)
 });
 
-tr.on('transformend', (e) => {
+tr.on('transform transformend', (e) => {
     let newprops = props
     newprops.x = rect.x() - rect.offsetX()
     newprops.z = rect.y() - rect.offsetY()
     newprops.w = rect.width() * rect.scaleX()
     newprops.d = rect.height() * rect.scaleY()
-    newprops.midYaw = rect.rotation() - 90
+    newprops.midYaw = -rect.rotation()
     //rect.setAttrs(newprops)
     console.log("transformed")
     console.log(newprops)
     onTransform(e, newprops)
+})
+
+tr.boundBoxFunc((oldBox: Box, newBox: Box):Box => {
+    if (newBox.width < .5 || newBox.height < .5) {
+        return oldBox
+    } else return newBox
 })
 
 onMount(() => {

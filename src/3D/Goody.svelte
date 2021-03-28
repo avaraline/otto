@@ -4,7 +4,7 @@ import {
     BoxBufferGeometry,
     Mesh
 } from "svelthree"
-import type { BufferGeometry } from "svelthree-three"
+import { BufferGeometry, DoubleSide } from "svelthree-three"
 
 import { createEventDispatcher, onMount } from 'svelte';
 import { radians } from "../util"
@@ -17,10 +17,13 @@ export let scene
 
 const dispatch = createEventDispatcher();
 let onClick = (e, props) => {
-    dispatch('clicked', {event: e, props: props})}
+    //dispatch('clicked', {event: e, props: props})
+}
 
 let geom:BufferGeometry = new BoxBufferGeometry(1, 1, 1)
-let mat = new MeshStandardMaterial()
+let mat = new MeshStandardMaterial({
+    side: DoubleSide
+})
 
 onMount(() => {
     loadBSP(props["shape"]).then((s) => {

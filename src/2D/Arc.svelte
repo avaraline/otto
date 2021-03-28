@@ -42,9 +42,9 @@ const tr = new Konva.Transformer({
 })
 
 layer.add(arc)
-layer.add(tr)
+//layer.add(tr)
 
-tr.hide()
+//tr.hide()
 
 arc.on('transform', (e) => {
     onTransform(e, props)
@@ -57,11 +57,13 @@ layer.draw()
 
 afterUpdate(() => {
     arc.setAttrs(arcprops())
+    /*
     if ($selected.includes(props.idx)) {
         tr.show()
         tr.forceUpdate()
     }
     else tr.hide()
+    */
 })
 onDestroy(() => arc.destroy())
 </script>

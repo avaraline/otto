@@ -18,6 +18,7 @@ export let onMove = (e, props) => {
 
 import { selected } from "../store"
 import invert from "invert-color"
+import type { Box } from 'konva/types/shapes/Transformer';
 
 const { getLayer } = getContext("konva_layer")
 const layer = getLayer()
@@ -33,13 +34,13 @@ let rectprops = ():RectConfig => { return {
     fill: props.fill,
     stroke: props.frame,
     strokeWidth: 1,
-    strokeScaleEnabled: false,
-    //cornerRadius: props.radius ?? 0,
-    //rotation: props.midYaw ? props.midYaw + 90 : 0
+    strokeScaleEnabled: false
 }}
 
 let arrowprops = ():ArrowConfig => { 
-
+    // draw an arrow pointing towards the incline of the ramp
+    // meaning travelling this direction on the ramp will raise
+    // you by deltaY
     let heading = props.lastArcAngle / 360
     let p1, p2
     var headingSign = heading < 0.875 && heading > 0.375 ? -1 : 1;
@@ -47,21 +48,18 @@ let arrowprops = ():ArrowConfig => {
         // x +/-
         p1 = [props.x + 10, props.z + (props.d / 2)]
         p2 = [(props.x + props.w) - 10, props.z + (props.d / 2)]
-        if (headingSign < 0) {
-            let temp = p1
-            p1 = p2
-            p2 = temp
-        }
     }
     else {
         // y +/-
         p1 = [props.x + (props.w / 2), props.z + 10]
         p2 = [props.x + (props.w / 2), (props.z + props.d) - 10]
-        if(headingSign < 0) {
-            let temp = p1
-            p1 = p2
-            p2 = temp
-        }
+        
+    }
+    // reverse direction
+    if(headingSign < 0) {
+        let temp = p1
+        p1 = p2
+        p2 = temp
     }
     
     return {
@@ -91,20 +89,26 @@ rect.on('click', (ev) => {
     onClick(ev.evt, props) 
 });
 
-rect.on('dragend', (ev) => {
+rect.on('dragmove dragend', (ev) => {
     let newprops = props
     newprops.x = rect.x() - rect.offsetX()
     newprops.z = rect.y() - rect.offsetY()
     onMove(ev.evt, newprops)
 });
 
-tr.on('transformend', (e) => {
+tr.on('transform transformend', (e) => {
     let newprops = props
     newprops.x = rect.x() - rect.offsetX()
     newprops.z = rect.y() - rect.offsetY()
     newprops.w = rect.width() * rect.scaleX()
     newprops.d = rect.height() * rect.scaleY()
     onTransform(e, newprops)
+})
+
+tr.boundBoxFunc((oldBox: Box, newBox: Box):Box => {
+    if (newBox.width < .5 || newBox.height < .5) {
+        return oldBox
+    } else return newBox
 })
 
 let g = new Konva.Group({

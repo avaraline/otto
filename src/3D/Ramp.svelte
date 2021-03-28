@@ -6,9 +6,9 @@ import {
 } from "svelthree"
 
 import { afterUpdate, createEventDispatcher } from "svelte"
-import { radians } from "../util"
 import type { AvaraObject, Ramp } from "../alf";
 import { selected } from "../store"
+import { getColorMat, wallMesh } from "../util";
 
 export let props:(AvaraObject & Ramp) 
 export let scene
@@ -45,7 +45,6 @@ let sx = 1, sy = 1, sz = 1;
 let rx = 0, rz = 0;
 
 let updateRamp = () => {
-    if(props.lastArcAngle < 0) throw 'what';
     let heading = props.lastArcAngle / 360
     sx = props.w
     sy = props.h
@@ -69,6 +68,7 @@ let updateRamp = () => {
     }
 
     if (sy == 0) sy = 0.01
+    /*
     console.log(props)
     console.log("Ramp solution:", {
         scale: [sx, sy, sz],
@@ -80,20 +80,18 @@ let updateRamp = () => {
             props.z + props.d / 2
         ]
     })
+    */
 }
 
 updateRamp()
 afterUpdate(updateRamp)
-let rampMesh = new BoxBufferGeometry(1, 1, 1)
-let rampMat = new MeshStandardMaterial()
 </script>
     
 <Mesh
     interact
     {scene}
-    geometry={rampMesh}
-    material={rampMat.clone()}
-    mat={{ color: props.fill }}
+    geometry={wallMesh}
+    material={getColorMat(props.fill)}
     pos={[
         props.x + props.w / 2,
         props.y + props.h / 2 + (props.deltaY / 2),

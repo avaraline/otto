@@ -3,7 +3,7 @@ import CodeMirror from '@svelte-parts/editor/codemirror'
 import 'codemirror/mode/xml/xml'
 import 'codemirror/lib/codemirror.css'
 import 'codemirror/theme/monokai.css'
-import { alfsource, objects, selected, editing} from './store'
+import { alfsource, objects, selected, editing, xmlupdate} from './store'
 import { createEventDispatcher } from 'svelte';
 
 export let theme = 'monokai'
@@ -18,6 +18,13 @@ const config = {
     mode: {
         name: 'xml',
         highlightFormatting: true,
+    }
+}
+
+const cm_pos = (pos) => { 
+    return {
+        line: pos.line,
+        ch: pos.character
     }
 }
 
@@ -57,21 +64,15 @@ let handleSelect = (ps, editor) => {
         if(hilite) hilite.clear()
         ps.map((idx) => {
             let p = $objects[idx]
-            let start = p["tag_start"]
-            let end = p["tag_end"]
-            let pos = {"line": start.line, "ch": start.character}
+            let start = cm_pos(p["tag_start"])
+            let end = cm_pos(p["tag_end"])
+
             editor.setGutterMarker(start.line, "CodeMirror-linenumbers", selectdec)
             
-            hilite =editor.markText({
-                line: start.line,
-                ch: start.character
-            },{
-                line: end.line,
-                ch: end.character,
-            }, {
+            hilite = editor.markText(start, end, {
                 css: "background-color:#535"
             })
-            editor.scrollIntoView(pos)
+            editor.scrollIntoView(start)
         })
     }
 
@@ -91,6 +92,13 @@ const accessEditor = editor => {
     })
     selected.subscribe((ps) => {
         handleSelect(ps, editor);
+    })
+    xmlupdate.subscribe(d => {
+        console.log(d);
+        updating = true;
+        editor.replaceRange(d.tag, cm_pos(d.start), cm_pos(d.end))
+        updating = false;
+        handleSelect($selected, editor)
     })
 }
 </script>

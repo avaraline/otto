@@ -1,6 +1,7 @@
 <script lang='ts'>
 import Konva from 'konva';
 import { afterUpdate, onMount, setContext } from 'svelte';
+import { groundColor } from '../store';
 
 setContext("konva", {
     getStage: () => stage

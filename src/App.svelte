@@ -6,7 +6,7 @@ import Preview from "./3D/Preview.svelte"
 import 'bulma/css/bulma.css'
 import { Snackbar, Modal, Button, Collapse } from "svelma"
 
-import { objects, alfsource, selected, editing } from "./store"
+import { objects, alfsource, selected, editing, xmlupdate } from "./store"
 import { loadText } from "./files";
 import { avaraObjectToTag, objectsFromMap } from "./alf"
 import { avaraluator_init_default } from "./avarluation";
@@ -28,6 +28,7 @@ const loadfile = (f) => {
 	let r = new FileReader();
 	r.addEventListener("load", (e) => {
 		avaraluator_init_default()
+		selected.set([])
 		alfsource.set(e.target.result)
 	})
 	r.readAsBinaryString(f[0])
@@ -36,6 +37,7 @@ const loadfile = (f) => {
 const loadfromdb = (path) => {
 	openDialog = false;
 	loadText(path).then((t) => {
+		selected.set([])
 		alfsource.set(t);
 	})
 }
@@ -58,10 +60,9 @@ const notify = (text:string, type:string):void => {
 }
 
 const in_place_update = (obj) => {
-	objects.set($objects.map((o) => {
-		if (o.idx == obj.idx) return obj;
-		else return o;
-	}))
+	/*
+	// get character start/end from 
+	// line/char start/end
 	var lines = $alfsource.split('\n')
 	let start = 0, end = 0
 	for (let i = 0; i < obj.tag_end.line; i++) {
@@ -72,22 +73,40 @@ const in_place_update = (obj) => {
 	}
 	start += obj.tag_start.character
 	end += obj.tag_end.character
-	console.log(start, end);
-	var newsource = 
-		$alfsource.substr(0, start) + 
-		avaraObjectToTag(obj) + 
-		$alfsource.substr(end, $alfsource.length)
-	console.log($alfsource.substr(start, end))
-	alfsource.set(newsource)
+	let old_tag = $alfsource.substr(start, end)
+	*/
+	
+	let new_tag = avaraObjectToTag(obj)
+
+	//send update to source editor
+	console.log(obj);
+	console.log(new_tag);
+	xmlupdate.set({
+		start: obj.tag_start,
+		end: obj.tag_end,
+		tag: new_tag
+	})
+	// update tag end
+	obj.tag_end = {
+		line: obj.tag_start.line,
+		character: obj.tag_start.character + new_tag.length
+	}
+	//update objects
+	objects.set($objects.map((current) => {
+		if (current.idx == obj.idx) return obj;
+		else return current;
+	}))
+	// refresh selection
 	selected.set($selected)
+	
 }
 
 const move = (e:CustomEvent) => {
 	console.log("moved", e)
-	let current = $objects[e.detail.props.idx]
+	// let current = $objects[e.detail.props.idx]
 	let newprops = e.detail.props
-	let xdiff = newprops.x - current.x
-	let ydiff = newprops.z - current.z
+	// let xdiff = newprops.x - current.x
+	// let ydiff = newprops.z - current.z
 	in_place_update(newprops)
 }
 
@@ -112,7 +131,7 @@ let mypreview:Preview
 
 onMount(async () => {
 	avaraluator_init_default()
-	loadText("./bwadi.alf").then(async s => {
+	loadText("./grimoire.alf").then(async s => {
 		width_2d = preview2D.offsetWidth
 		height_2d = preview2D.offsetHeight
 		width_3d = preview3D.offsetWidth

@@ -1,44 +1,69 @@
 <script lang="ts">
-import { createEventDispatcher } from "svelte"
 import {
     Canvas,
     Scene,
     PerspectiveCamera,
-    Mesh,
-    DirectionalLight,
-    MeshStandardMaterial,
-    BoxBufferGeometry,
     WebGLRenderer,
-    AmbientLight,
     OrbitControls,
     Vector3,
-Material,
 } from "svelthree";
-import { objects } from "../store"
+import { objects, selected } from "../store"
 import Wall from "./Wall.svelte"
 import Ramp from "./Ramp.svelte"
 import Goody from "./Goody.svelte"
+import Lights from "./Lights.svelte"
+import SkyBox from "./SkyBox.svelte"
 export let width = 800;
 export let height = 500;
 
 let overX = 0, overY = 100, overZ = 0
-let minX = 0, maxX = 0, minZ = 0, maxZ = 0, maxY = 5
+let minX = 100000, maxX = 0, minZ = 100000, maxZ = 0, maxY = 0
+let initCam = true
+let cameraTarget = new Vector3(0, 10, 0)
+let pcam
 
-
-
-//loadBSP(400).then((shape) => {wallMesh = shape})
 objects.subscribe((os) => {
     os.map((w, idx) => {
-        if (w.x < minX) minX = w.x
-        if (w.z < minZ) minZ = w.z
-        if (w.x > maxX) maxX = w.x
-        if (w.z > maxZ) maxZ = w.z
+        let hw = w.w / 2
+        let hd = w.d / 2
+        let hh = w.h / 2
+        if (w.x - hw < minX) minX = w.x - hw
+        if (w.z - hd < minZ) minZ = w.z - hd
+        if (w.x + hw > maxX) maxX = w.x + hw
+        if (w.y + hh > maxY) maxY = w.y + hh
+        if (w.z + hd > maxZ) maxZ = w.z + hd
         if (w.wa && w.wa > maxY) 
             maxY = w.wa
     })
     overX = (minX + maxX) / 2
-    overY = maxY
+    overY = maxY / 2
     overZ = (minZ + maxZ) / 2
+
+    if(pcam && initCam) {
+        let c = pcam.getCamera()
+        cameraTarget.set(overX, overY, overZ)
+        console.log(c.position)
+        if (c.position )
+        c.position.set(overX, overY + 100, overZ + 100)
+        initCam = false
+    }
+
+})
+
+selected.subscribe((idxs) => {
+    if (idxs.length < 1) return
+    let x = 0, y = 0, z = 0
+    idxs.map((idx) => {
+        x += ($objects[idx].x ?? $objects[idx].cx) + $objects[idx].w / 2
+        y += $objects[idx].y + $objects[idx].h / 2
+        z += ($objects[idx].z ?? $objects[idx].cz) + $objects[idx].d / 2
+    })
+    cameraTarget.set(
+        x / idxs.length,
+        y / idxs.length,
+        z / idxs.length
+    )
+    console.log(cameraTarget)
 })
 let myscene:Scene
 export const getScene = () => myscene.getScene()
@@ -49,10 +74,12 @@ export const getScene = () => myscene.getScene()
     <Scene {sti} let:scene bind:this={myscene} id="scene1" props={{ background: 0xedf2f7 }}>
         <PerspectiveCamera 
             {scene} 
+            bind:this={pcam}
             id="cam1" 
-            props={{ position: [overX, overZ, overY + 30], lookAt: [overX, overY, overZ], near: 0.1, far: 2000 }} />
-        <DirectionalLight {scene} props={{position:[10, 10, 10]}} />
-        <AmbientLight {scene} props={{ position: [3, 3, 3] }} intensity={0.3}/>
+            props={{near: 0.1, far: 2500 }}>
+        </PerspectiveCamera>
+        <SkyBox {scene} />
+        <Lights {scene} />
         {#each $objects as props}
             {#if props.tag_name == "Wall" || props.tag_name == "WallDoor"}
                 <Wall {scene} {props} on:clicked />
@@ -64,8 +91,7 @@ export const getScene = () => myscene.getScene()
                 <Goody {scene} {props} on:clicked />
             {/if}
         {/each}
-        
-        <OrbitControls {scene} enableDamping props={{target: new Vector3(overX, overY, overZ)}} />
+        <OrbitControls {scene} enableDamping props={{target: cameraTarget}} />
         <WebGLRenderer
                 {sti}
                 sceneId="scene1"
