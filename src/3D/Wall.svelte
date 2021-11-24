@@ -28,9 +28,9 @@ const min_thicc = 0.01
     geometry={wallMesh}
     material={getColorMat(props.fill)}
     pos={[
-        props.x + (props.w < min_thicc ? min_thicc : props.w / 2),
+        props.x ,
         props.y + (props.h < min_thicc ? min_thicc : props.h / 2),
-        props.z + (props.d < min_thicc ? min_thicc : props.d / 2)
+        props.z 
     ]}
     scale={[
         props.w < min_thicc ? min_thicc : props.w,

@@ -93,9 +93,9 @@ afterUpdate(updateRamp)
     geometry={wallMesh}
     material={getColorMat(props.fill)}
     pos={[
-        props.x + props.w / 2,
+        props.x ,
         props.y + props.h / 2 + (props.deltaY / 2),
-        props.z + props.d / 2
+        props.z 
     ]}
     scale={[sx, sy, sz]}
     rot={[rx, 0, rz]}

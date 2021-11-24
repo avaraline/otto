@@ -262,7 +262,9 @@ export async function objectsFromMap(map_string:string): Promise<any> {
                                 n = n.replace(/\.([0-9])\./, "[$1].")
                             }
                             let scr = `${n} = ${v}`
-                            //console.log(scr)
+                            if (n == "designer" || n == "information")
+                                scr = `${n} = "${v}"`
+                            console.log(scr)
                             avarluate_script(scr)
                         })
                         break

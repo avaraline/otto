@@ -21,8 +21,8 @@ const { getLayer } = getContext("konva_layer")
 const layer = getLayer()
 
 let rectprops = ():RectConfig => { return {
-    x: props.x + (props.w / 2),
-    y: props.z + (props.d / 2),
+    x: props.x ,
+    y: props.z,
     width: props.w,
     height: props.d,
     offsetX: props.w / 2,
@@ -50,15 +50,15 @@ rect.on('click', (ev) => {
 
 rect.on('dragmove dragend', (ev) => {
     let newprops = props
-    newprops.x = rect.x() - rect.offsetX()
-    newprops.z = rect.y() - rect.offsetY()
+    newprops.x = rect.x()
+    newprops.z = rect.y()
     onMove(ev.evt, newprops)
 });
 
 tr.on('transform transformend', (e) => {
     let newprops = props
-    newprops.x = rect.x() - rect.offsetX()
-    newprops.z = rect.y() - rect.offsetY()
+    newprops.x = rect.x()
+    newprops.z = rect.y()
     newprops.w = rect.width() * rect.scaleX()
     newprops.d = rect.height() * rect.scaleY()
     newprops.midYaw = -rect.rotation()

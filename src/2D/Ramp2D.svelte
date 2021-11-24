@@ -24,8 +24,8 @@ const { getLayer } = getContext("konva_layer")
 const layer = getLayer()
 
 let rectprops = ():RectConfig => { return {
-    x: props.x + (props.w / 2),
-    y: props.z + (props.d / 2),
+    x: props.x,
+    y: props.z,
     width: props.w,
     height: props.d,
     offsetX: props.w / 2,
@@ -46,17 +46,17 @@ let arrowprops = ():ArrowConfig => {
     var headingSign = heading < 0.875 && heading > 0.375 ? -1 : 1;
     if ((heading >= 0.125 && heading < 0.375) || (heading >= 0.625 && heading < 0.875)) {
         // x +/-
-        p1 = [props.x + 10, props.z + (props.d / 2)]
-        p2 = [(props.x + props.w) - 10, props.z + (props.d / 2)]
+        p1 = [props.x - (props.w / 2), props.z]
+        p2 = [props.x + (props.w / 2), props.z]
     }
     else {
-        // y +/-
-        p1 = [props.x + (props.w / 2), props.z + 10]
-        p2 = [props.x + (props.w / 2), (props.z + props.d) - 10]
+        // y +/-    
+        p1 = [props.x, props.z - (props.d / 2)]
+        p2 = [props.x, props.z + (props.d / 2)]
         
     }
     // reverse direction
-    if(headingSign < 0) {
+    if(headingSign > 0) {
         let temp = p1
         p1 = p2
         p2 = temp
@@ -91,15 +91,15 @@ rect.on('click', (ev) => {
 
 rect.on('dragmove dragend', (ev) => {
     let newprops = props
-    newprops.x = rect.x() - rect.offsetX()
-    newprops.z = rect.y() - rect.offsetY()
+    newprops.x = rect.x()
+    newprops.z = rect.y()
     onMove(ev.evt, newprops)
 });
 
 tr.on('transform transformend', (e) => {
     let newprops = props
-    newprops.x = rect.x() - rect.offsetX()
-    newprops.z = rect.y() - rect.offsetY()
+    newprops.x = rect.x()
+    newprops.z = rect.y()
     newprops.w = rect.width() * rect.scaleX()
     newprops.d = rect.height() * rect.scaleY()
     onTransform(e, newprops)

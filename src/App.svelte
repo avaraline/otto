@@ -29,7 +29,11 @@ const loadfile = (f) => {
 	r.addEventListener("load", (e) => {
 		avaraluator_init_default()
 		selected.set([])
-		alfsource.set(e.target.result)
+		let txt = "";
+		if (e.target.result instanceof ArrayBuffer)
+			txt = String.fromCharCode.apply(null, new Uint16Array(e.target.result));
+		else txt = e.target.result;
+		alfsource.set(txt)
 	})
 	r.readAsBinaryString(f[0])
 	openDialog = false;
@@ -131,7 +135,7 @@ let mypreview:Preview
 
 onMount(async () => {
 	avaraluator_init_default()
-	loadText("./grimoire.alf").then(async s => {
+	loadText("./levels/iya/alf/iya.alf").then(async s => {
 		width_2d = preview2D.offsetWidth
 		height_2d = preview2D.offsetHeight
 		width_3d = preview3D.offsetWidth
@@ -145,7 +149,10 @@ onMount(async () => {
 			avaraluator_init_default()
 			objectsFromMap(s).then((o) => {
 				objects.set(o.filter(t => t))
-			}).catch((r) => console.log(r))
+			}).catch((r) => { 
+				console.error(r)
+				console.error(s);
+			})
 			console.log(objects)
 		})	
 	})	
